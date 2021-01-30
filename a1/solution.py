@@ -88,7 +88,36 @@ def anytime_weighted_astar(initial_state, heur_fn, weight=1., timebound = 5):
   '''INPUT: a sokoban state that represents the start state and a timebound (number of seconds)'''
   '''OUTPUT: A goal state (if a goal is found), else False'''
   '''implementation of weighted astar algorithm'''
-  return False
+
+  # Get Search Engine running
+  wrapped_fval_function = (lambda sN : fval_function(sN,weight))
+  searchEngine = SearchEngine('custom')
+  # searchEngine.trace_on(1)
+  searchEngine.init_search(initial_state,snowman_goal_state,heur_fn,wrapped_fval_function)
+
+  start = os.times()[0]
+
+  searchResult = searchEngine.search(timebound)
+
+  #search doc
+  #timebound is a bound on the amount of time your code will execute the search. Once the run time exceeds the time bound, the search will stop; if no solution has been found, the search will return False.
+  #costbound is an optional bound on the cost of each state s that is explored. The parameter costbound should be a 3-tuple (g bound,h bound,g + h bound). If a node's g val is greater than g bound, h val is greater than h bound, or g val + h val is greater than g + h bound, that node will not be expanded. You will use costbound to implement pruning in both of the anytime searches described below.
+
+  end = os.times()[0] - start 
+  costBoundTuple = (int(), int(), int())
+  costSet = False
+
+  while (end < timebound):
+    if (searchResult == False):
+      return searchResult
+      
+    if (searchResult.gval < costBoundTuple[0] or costSet == False):
+      costSet = True
+      costBoundTuple = (searchResult.gval, searchResult.gval, searchResult.gval)
+      searchResult = searchEngine.search(timebound, costBoundTuple)
+    end = os.times()[0] - start
+    
+  return searchResult
 
 def anytime_gbfs(initial_state, heur_fn, timebound = 5):
 #IMPLEMENT
@@ -97,3 +126,43 @@ def anytime_gbfs(initial_state, heur_fn, timebound = 5):
   '''OUTPUT: A goal state (if a goal is found), else False'''
   '''implementation of weighted astar algorithm'''
   return False
+
+if __name__ == "__main__":
+  len_benchmark = [44, 43, 20, 36, 35, 34, 18, 22, 34, 28, 32, 43, 35, -99, -99, 40, -99, -99, 46, -99]
+
+  ##############################################################
+  # TEST ANYTIME WEIGHTED A STAR
+  print('Testing Anytime Weighted A Star')
+
+  solved = 0; unsolved = []; benchmark = 0; timebound = 5 #time limit
+  for i in range(0, len(PROBLEMS)):
+    print("*************************************")
+    print("PROBLEM {}".format(i))
+
+    s0 = PROBLEMS[i] #Final problems are hardest
+    weight = 100 #we will start with a large weight so you can experiment with rate at which it decrements
+    final = anytime_weighted_astar(s0, heur_fn=heur_manhattan_distance, weight=weight, timebound=timebound)
+
+    if final:
+      if i < len(len_benchmark):
+        index = i
+      else:
+        index = 0
+      if final.gval <= len_benchmark[index] or len_benchmark[index] == -99:
+        benchmark += 1
+      solved += 1
+    else:
+      unsolved.append(i)
+
+  # s0 = PROBLEMS[3]
+  # weight = 100 
+  # final = anytime_weighted_astar(s0, heur_fn=heur_manhattan_distance, weight=weight, timebound=timebound)
+  # if (final):
+  #   print(final)
+
+  print("\n*************************************")
+  print("Of {} initial problems, {} were solved in less than {} seconds by this solver.".format(len(PROBLEMS), solved, timebound))
+  print("Of the {} problems that were solved, the cost of {} matched or outperformed the benchmark.".format(solved, benchmark))
+  print("Problems that remain unsolved in the set are Problems: {}".format(unsolved))
+  print("The benchmark implementation solved {} out of the 20 practice problems given {} seconds.".format(15, timebound))
+  print("*************************************\n")
