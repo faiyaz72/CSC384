@@ -111,7 +111,7 @@ def anytime_weighted_astar(initial_state, heur_fn, weight=1., timebound = 5):
     if (searchResult == False):
       return searchResult
       
-    if (searchResult.gval < costBoundTuple[0] or costSet == False):
+    if (costSet == False or searchResult.gval < costBoundTuple[0]):
       costSet = True
       costBoundTuple = (searchResult.gval, searchResult.gval, searchResult.gval)
       searchResult = searchEngine.search(timebound, costBoundTuple)
