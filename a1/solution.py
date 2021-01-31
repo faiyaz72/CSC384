@@ -49,14 +49,66 @@ def trivial_heuristic(state):
   return len(state.snowballs)
 
 def heur_alternate(state):
-#IMPLEMENT
-    '''a better heuristic'''
-    '''INPUT: a sokoban state'''
-    '''OUTPUT: a numeric value that serves as an estimate of the distance of the state to the goal.'''
-    #heur_manhattan_distance has flaws.
-    #Write a heuristic function that improves upon heur_manhattan_distance to estimate distance between the current state and the goal.
-    #Your function should return a numeric value for the estimate of the distance to the goal.
-    return 0
+  #IMPLEMENT
+  '''a better heuristic'''
+  '''INPUT: a sokoban state'''
+  '''OUTPUT: a numeric value that serves as an estimate of the distance of the state to the goal.'''
+  #heur_manhattan_distance has flaws.
+  #Write a heuristic function that improves upon heur_manhattan_distance to estimate distance between the current state and the goal.
+  #Your function should return a numeric value for the estimate of the distance to the goal.
+
+  # Tips
+  # Don't simple ignore obstacles, add a cost in circumnavigating thme
+  snowballs = state.snowballs
+  destination = state.destination
+  distance = 0
+  xd = destination[0]
+  yd = destination[1]
+
+  # Create obstacle map
+  # temp = state.obstacles
+  obstacleMapX = {}
+  obstacleMapY = {}
+  for obstacle in state.obstacles:
+    if (obstacle[0] not in obstacleMapX):
+      obstacleMapX[obstacle[0]] = [obstacle[1]]
+    else:
+      obstacleMapX[obstacle[0]].append(obstacle[1])
+    
+    if (obstacle[1] not in obstacleMapY):
+      obstacleMapY[obstacle[1]] = [obstacle[0]]
+    else:
+      obstacleMapY[obstacle[1]].append(obstacle[0])
+
+  for snowball in snowballs:
+    # Focus on snowball y
+    # Check if obstacle on the way
+    x1 = snowball[0]
+    y1 = snowball[1]
+    costToGoAroundY = 0
+    costToGoAroundX = 0
+    if (x1 in obstacleMapX):
+      # Determine if obstacle in the path of goal
+      yObstacleCount = 0
+      for yVal in obstacleMapX[x1]:
+        if ((yd < yVal and y1 > yVal) or (yd > yVal and y1 < yVal)):
+          yObstacleCount = yObstacleCount + 1
+      
+      costToGoAroundY = yObstacleCount * 4
+  
+    if (y1 in obstacleMapY):
+      # Determine if obstacle in the path of goal
+      xObstacleCount = 0
+      for xVal in obstacleMapY[y1]:
+        if ((xd < xVal and x1 > xVal) or (xd > xVal and x1 < xVal)):
+          xObstacleCount = xObstacleCount + 1
+      
+      costToGoAroundX = xObstacleCount * 4
+    
+    distance = distance + abs(xd - x1) + abs(yd - y1) + costToGoAroundX + costToGoAroundY
+    
+
+  return distance
 
 def heur_zero(state):
     '''Zero Heuristic can be used to make A* search perform uniform cost search'''
@@ -141,7 +193,7 @@ if __name__ == "__main__":
 
     s0 = PROBLEMS[i] #Final problems are hardest
     weight = 100 #we will start with a large weight so you can experiment with rate at which it decrements
-    final = anytime_weighted_astar(s0, heur_fn=heur_manhattan_distance, weight=weight, timebound=timebound)
+    final = anytime_weighted_astar(s0, heur_fn=heur_alternate, weight=weight, timebound=timebound)
 
     if final:
       if i < len(len_benchmark):
