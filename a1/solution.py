@@ -63,6 +63,18 @@ def trivial_heuristic(state):
     return len(state.snowballs)
 
 
+def verifyNotEdge(height, width, snowball):
+    return 0
+
+
+def addObstacleCost(obstacles, snowball):
+    return 0
+
+
+def robotTravellingCost(snowball, robotLocation):
+    return 0
+
+
 def heur_alternate(state):
     # IMPLEMENT
     '''a better heuristic'''
@@ -87,10 +99,16 @@ def heur_alternate(state):
 
         # never go to edge unless goal is ON THE SAME Edge
         # Take acount of robot travelling to snowball
-        # if (xd == state.width - 1 or yd == state.height - 1):
+        # some how take account of obstacles without loop
+        checkCost = verifyNotEdge(state.height, state.width, snowball) + \
+            addObstacleCost(state.obstacles, snowball) + \
+            robotTravellingCost(snowball, state.robot)
 
-        distance = distance + ((abs(xd - x1) + abs(yd - y1))
-                               * getStackValue(size))
+        if (checkCost == float('inf')):
+            return float('inf')
+
+        distance = distance + \
+            ((abs(xd - x1) + abs(yd - y1)) + checkCost) * getStackValue(size)
 
     return distance
 
@@ -189,7 +207,7 @@ if __name__ == "__main__":
         s0 = PROBLEMS[i]  # Final problems are hardest
         weight = 100  # we will start with a large weight so you can experiment with rate at which it decrements
         final = anytime_weighted_astar(
-            s0, heur_fn=heur_manhattan_distance, weight=weight, timebound=timebound)
+            s0, heur_fn=heur_alternate, weight=weight, timebound=timebound)
 
         if final:
             if i < len(len_benchmark):
