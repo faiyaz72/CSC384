@@ -13,6 +13,16 @@ from snowman import SnowmanState, Direction, snowman_goal_state
 from test_problems import PROBLEMS  # 20 test problems
 
 
+def getStackValue(size):
+
+    if (size == 3 or size == 4 or size == 5):
+        return 2
+    elif (size == 6):
+        return 3
+    else:
+        return 1
+
+
 def heur_manhattan_distance(state):
     # IMPLEMENT
     '''admissible sokoban puzzle heuristic: manhattan distance'''
@@ -25,9 +35,9 @@ def heur_manhattan_distance(state):
     # You should implement this heuristic function exactly, even if it is tempting to improve it.
     # Your function should return a numeric value; this is the estimate of the distance to the goal.
 
-  # Get all snowmans cordinates
-  # Get distance cordinates
-  # Compute and add
+    # Get all snowmans cordinates
+    # Get distance cordinates
+    # Compute and add
     snowballs = state.snowballs
     destination = state.destination
     distance = 0
@@ -38,7 +48,9 @@ def heur_manhattan_distance(state):
         x1 = snowball[0]
         y1 = snowball[1]
 
-        distance = distance + abs(x0 - x1) + abs(y0 - y1)
+        size = state.snowballs[snowball]
+        distance = distance + ((abs(x0 - x1) + abs(y0 - y1))
+                               * getStackValue(size))
 
     return distance
 
@@ -68,48 +80,17 @@ def heur_alternate(state):
     xd = destination[0]
     yd = destination[1]
 
-    # Create obstacle map
-    # temp = state.obstacles
-    obstacleMapX = {}
-    obstacleMapY = {}
-    for obstacle in state.obstacles:
-        if (obstacle[0] not in obstacleMapX):
-            obstacleMapX[obstacle[0]] = [obstacle[1]]
-        else:
-            obstacleMapX[obstacle[0]].append(obstacle[1])
-
-        if (obstacle[1] not in obstacleMapY):
-            obstacleMapY[obstacle[1]] = [obstacle[0]]
-        else:
-            obstacleMapY[obstacle[1]].append(obstacle[0])
-
     for snowball in snowballs:
-        # Focus on snowball y
-        # Check if obstacle on the way
         x1 = snowball[0]
         y1 = snowball[1]
-        costToGoAroundY = 0
-        costToGoAroundX = 0
-        if (x1 in obstacleMapX):
-            # Determine if obstacle in the path of goal
-            yObstacleCount = 0
-            for yVal in obstacleMapX[x1]:
-                if ((yd < yVal and y1 > yVal) or (yd > yVal and y1 < yVal)):
-                    yObstacleCount = yObstacleCount + 1
+        size = state.snowballs[snowball]
 
-            costToGoAroundY = yObstacleCount * 4
+        # never go to edge unless goal is ON THE SAME Edge
+        # Take acount of robot travelling to snowball
+        # if (xd == state.width - 1 or yd == state.height - 1):
 
-        if (y1 in obstacleMapY):
-            # Determine if obstacle in the path of goal
-            xObstacleCount = 0
-            for xVal in obstacleMapY[y1]:
-                if ((xd < xVal and x1 > xVal) or (xd > xVal and x1 < xVal)):
-                    xObstacleCount = xObstacleCount + 1
-
-            costToGoAroundX = xObstacleCount * 4
-
-        distance = distance + abs(xd - x1) + abs(yd - y1) + \
-            costToGoAroundX + costToGoAroundY
+        distance = distance + ((abs(xd - x1) + abs(yd - y1))
+                               * getStackValue(size))
 
     return distance
 
@@ -208,7 +189,7 @@ if __name__ == "__main__":
         s0 = PROBLEMS[i]  # Final problems are hardest
         weight = 100  # we will start with a large weight so you can experiment with rate at which it decrements
         final = anytime_weighted_astar(
-            s0, heur_fn=heur_alternate, weight=weight, timebound=timebound)
+            s0, heur_fn=heur_manhattan_distance, weight=weight, timebound=timebound)
 
         if final:
             if i < len(len_benchmark):
