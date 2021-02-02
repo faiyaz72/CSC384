@@ -64,15 +64,13 @@ def trivial_heuristic(state):
 
 
 def verifyNotEdge(height, width, snowball, destination):
-    #check begin lowerbouds
-    if ((destination[0] != 0 and snowball[0] == 0) or (destination[1] != 0 and snowball[1] == 0)): 
+    # check begin lowerbouds
+    if ((destination[0] != 0 and snowball[0] == 0) or (destination[1] != 0 and snowball[1] == 0)):
         return float('inf')
-    
-    #check begin upperbounds
+
+    # check begin upperbounds
     if ((destination[0] != (width - 1) and snowball[0] == (width - 1)) or (destination[1] != (height - 1) and snowball[1] == (height - 1))):
         return float('inf')
-    
-
 
     return 0
 
@@ -81,8 +79,8 @@ def addObstacleCost(obstacles, snowball):
     return 0
 
 
-def robotTravellingCost(snowball, robotLocation):
-    return 0
+def robotTravellingCost(destination, robotLocation):
+    return abs(destination[0] - robotLocation[0]) + abs(destination[1] - robotLocation[1])
 
 
 def heur_alternate(state):
@@ -96,7 +94,7 @@ def heur_alternate(state):
 
     snowballs = state.snowballs
     destination = state.destination
-    distance = 0
+    cost = 0
     xd = destination[0]
     yd = destination[1]
 
@@ -109,16 +107,17 @@ def heur_alternate(state):
         # Take acount of robot travelling to snowball
         # some how take account of obstacles without loop
         if (verifyNotEdge(state.height, state.width, snowball, destination) == float('inf')):
-             return float('inf')
-        
+            return float('inf')
 
-        checkCost = addObstacleCost(state.obstacles, snowball) + \
-            robotTravellingCost(snowball, state.robot)
+        checkCost = addObstacleCost(state.obstacles, snowball)
+            
 
-        distance = distance + \
-            ((abs(xd - x1) + abs(yd - y1)) + checkCost) * getStackValue(size)
+        cost = cost + \
+            (abs(xd - x1) + abs(yd - y1)) * getStackValue(size)
 
-    return distance
+    cost = cost + robotTravellingCost(destination, state.robot)
+
+    return cost
 
 
 def heur_zero(state):
@@ -174,7 +173,6 @@ def anytime_weighted_astar(initial_state, heur_fn, weight=1., timebound=5):
     # costbound is an optional bound on the cost of each state s that is explored. The parameter costbound should be a 3-tuple (g bound,h bound,g + h bound). If a node's g val is greater than g bound, h val is greater than h bound, or g val + h val is greater than g + h bound, that node will not be expanded. You will use costbound to implement pruning in both of the anytime searches described below.
 
     end = os.times()[0] - start
-    
 
     while (end <= limitTime):
         if (searchResult == False):
@@ -185,10 +183,9 @@ def anytime_weighted_astar(initial_state, heur_fn, weight=1., timebound=5):
             costBoundTuple = (searchResult.gval,
                               searchResult.gval, searchResult.gval)
             tempResult = searchResult
-        
+
         searchResult = searchEngine.search(timebound, costBoundTuple)
         end = os.times()[0] - start
-        
 
     return tempResult
 
@@ -222,10 +219,9 @@ def anytime_gbfs(initial_state, heur_fn, timebound=5):
             costBoundTuple = (searchResult.gval,
                               searchResult.gval, searchResult.gval)
             tempResult = searchResult
-        
+
         searchResult = searchEngine.search(timebound, costBoundTuple)
         end = os.times()[0] - start
-        
 
     return tempResult
 
