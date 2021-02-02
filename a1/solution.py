@@ -63,7 +63,17 @@ def trivial_heuristic(state):
     return len(state.snowballs)
 
 
-def verifyNotEdge(height, width, snowball):
+def verifyNotEdge(height, width, snowball, destination):
+    #check begin lowerbouds
+    if ((destination[0] != 0 and snowball[0] == 0) or (destination[1] != 0 and snowball[1] == 0)): 
+        return float('inf')
+    
+    #check begin upperbounds
+    if ((destination[0] != (width - 1) and snowball[0] == (width - 1)) or (destination[1] != (height - 1) and snowball[1] == (height - 1))):
+        return float('inf')
+    
+
+
     return 0
 
 
@@ -84,8 +94,6 @@ def heur_alternate(state):
     # Write a heuristic function that improves upon heur_manhattan_distance to estimate distance between the current state and the goal.
     # Your function should return a numeric value for the estimate of the distance to the goal.
 
-    # Tips
-    # Don't simple ignore obstacles, add a cost in circumnavigating thme
     snowballs = state.snowballs
     destination = state.destination
     distance = 0
@@ -100,12 +108,12 @@ def heur_alternate(state):
         # never go to edge unless goal is ON THE SAME Edge
         # Take acount of robot travelling to snowball
         # some how take account of obstacles without loop
-        checkCost = verifyNotEdge(state.height, state.width, snowball) + \
-            addObstacleCost(state.obstacles, snowball) + \
-            robotTravellingCost(snowball, state.robot)
+        if (verifyNotEdge(state.height, state.width, snowball, destination) == float('inf')):
+             return float('inf')
+        
 
-        if (checkCost == float('inf')):
-            return float('inf')
+        checkCost = addObstacleCost(state.obstacles, snowball) + \
+            robotTravellingCost(snowball, state.robot)
 
         distance = distance + \
             ((abs(xd - x1) + abs(yd - y1)) + checkCost) * getStackValue(size)
@@ -147,13 +155,17 @@ def anytime_weighted_astar(initial_state, heur_fn, weight=1., timebound=5):
     '''implementation of weighted astar algorithm'''
 
     # Get Search Engine running
+    costBoundTuple = (float('inf'), float('inf'), float('inf'))
+    costSet = False
+    tempResult = False
+
     wrapped_fval_function = (lambda sN: fval_function(sN, weight))
-    searchEngine = SearchEngine('custom')
-    # searchEngine.trace_on(1)
+    searchEngine = SearchEngine('custom', 'full')
     searchEngine.init_search(
         initial_state, snowman_goal_state, heur_fn, wrapped_fval_function)
 
     start = os.times()[0]
+    limitTime = start + timebound
 
     searchResult = searchEngine.search(timebound)
 
@@ -162,21 +174,23 @@ def anytime_weighted_astar(initial_state, heur_fn, weight=1., timebound=5):
     # costbound is an optional bound on the cost of each state s that is explored. The parameter costbound should be a 3-tuple (g bound,h bound,g + h bound). If a node's g val is greater than g bound, h val is greater than h bound, or g val + h val is greater than g + h bound, that node will not be expanded. You will use costbound to implement pruning in both of the anytime searches described below.
 
     end = os.times()[0] - start
-    costBoundTuple = (int(), int(), int())
-    costSet = False
+    
 
-    while (end < timebound):
+    while (end <= limitTime):
         if (searchResult == False):
-            return searchResult
+            return tempResult
 
         if (costSet == False or searchResult.gval < costBoundTuple[0]):
             costSet = True
             costBoundTuple = (searchResult.gval,
                               searchResult.gval, searchResult.gval)
-            searchResult = searchEngine.search(timebound, costBoundTuple)
+            tempResult = searchResult
+        
+        searchResult = searchEngine.search(timebound, costBoundTuple)
         end = os.times()[0] - start
+        
 
-    return searchResult
+    return tempResult
 
 
 def anytime_gbfs(initial_state, heur_fn, timebound=5):
@@ -185,7 +199,35 @@ def anytime_gbfs(initial_state, heur_fn, timebound=5):
     '''INPUT: a sokoban state that represents the start state and a timebound (number of seconds)'''
     '''OUTPUT: A goal state (if a goal is found), else False'''
     '''implementation of weighted astar algorithm'''
-    return False
+    # Get Search Engine running
+    costBoundTuple = (float('inf'), float('inf'), float('inf'))
+    costSet = False
+    tempResult = False
+
+    searchEngine = SearchEngine('best_first', 'full')
+    searchEngine.init_search(
+        initial_state, snowman_goal_state, heur_fn)
+
+    start = os.times()[0]
+    limitTime = start + timebound
+
+    searchResult = searchEngine.search(timebound)
+    end = os.times()[0] - start
+    while (end <= limitTime):
+        if (searchResult == False):
+            return tempResult
+
+        if (costSet == False or searchResult.gval < costBoundTuple[0]):
+            costSet = True
+            costBoundTuple = (searchResult.gval,
+                              searchResult.gval, searchResult.gval)
+            tempResult = searchResult
+        
+        searchResult = searchEngine.search(timebound, costBoundTuple)
+        end = os.times()[0] - start
+        
+
+    return tempResult
 
 
 if __name__ == "__main__":
