@@ -78,28 +78,45 @@ def verifyNotEdge(height, width, snowball, destination):
 def addObstacleCost(obstacles, snowball, destination):
     return 0
 
-def constructObstacleMap(obstacles):
-  result = {}
-  obstacleMapX = {}
-  obstacleMapY = {}
-  for obstacle in obstacles:
-    if (obstacle[0] not in obstacleMapX):
-      obstacleMapX[obstacle[0]] = [obstacle[1]]
-    else:
-      obstacleMapX[obstacle[0]].append(obstacle[1])
-    
-    if (obstacle[1] not in obstacleMapY):
-      obstacleMapY[obstacle[1]] = [obstacle[0]]
-    else:
-      obstacleMapY[obstacle[1]].append(obstacle[0])
-  
-  result['mapX'] = obstacleMapX
-  result['mapY'] = obstacleMapY
 
-  return result
+def constructObstacleMap(obstacles):
+    result = {}
+    obstacleMapX = {}
+    obstacleMapY = {}
+    for obstacle in obstacles:
+        if (obstacle[0] not in obstacleMapX):
+            obstacleMapX[obstacle[0]] = [obstacle[1]]
+        else:
+            obstacleMapX[obstacle[0]].append(obstacle[1])
+
+        if (obstacle[1] not in obstacleMapY):
+            obstacleMapY[obstacle[1]] = [obstacle[0]]
+        else:
+            obstacleMapY[obstacle[1]].append(obstacle[0])
+
+    result['mapX'] = obstacleMapX
+    result['mapY'] = obstacleMapY
+
+    return result
+
 
 def robotTravellingCost(destination, robotLocation):
     return abs(destination[0] - robotLocation[0]) + abs(destination[1] - robotLocation[1])
+
+
+def handleGoal(snowball, snowballs, size, xd, yd):
+    if (size == 0):
+        return True
+    elif (size == 1):
+        # make sure large is already there
+        return snowballs[(xd, yd)] == 0
+
+    elif (size == 2):
+        # make sure either large and medium already there
+        return snowballs[(xd, yd)] == 3
+
+    else:
+        return False
 
 
 def heur_alternate(state):
@@ -126,20 +143,20 @@ def heur_alternate(state):
 
         # Early Continue if at goal
         if (x1 == xd and y1 == yd):
-            continue
-        
+            if (handleGoal(snowball, snowballs, size, xd, yd)):
+                continue
 
         # never go to edge unless goal is ON THE SAME Edge
         # Take acount of robot travelling to snowball
         # some how take account of obstacles without loop
         if (verifyNotEdge(state.height, state.width, snowball, destination) == float('inf')):
-          return float('inf')
+            return float('inf')
 
-        if (verifyNotInCorner(obstacleMap['mapX'], obstacleMap['mapY'], x1, y1) == float('inf')):
-          return float('inf') 
+        if (verifyNotInCorner(obstacleMap['mapX'], obstacleMap['mapY'], x1, y1, xd, yd) == float('inf')):
+            return float('inf')
 
-        obstacleCost = 0
-            
+        obstacleCost = computeObstacleCost(
+            obstacleMap['mapX'], obstacleMap['mapY'], xd, yd)
 
         cost = cost + \
             ((abs(xd - x1) + abs(yd - y1)) + obstacleCost) * getStackValue(size)
@@ -148,32 +165,48 @@ def heur_alternate(state):
 
     return cost
 
-def verifyNotInCorner(mapX, mapY, x1, y1):
+
+def verifyNotInCorner(mapX, mapY, x1, y1, xd, yd):
     check = 0
-    #check deadend left
+    left = False
+    right = False
+    up = False
+    down = False
+    # check deadend left
     if ((x1 - 1) in mapX):
-      if (y1 in mapX[x1-1]):
-        check += 1
-    
-    #check deadend right
+        if (y1 in mapX[x1-1]):
+            left = True
+            check += 1
+
+    # check deadend right
     if ((x1 + 1) in mapX):
-      if (y1 in mapX[x1+1]):
-        check += 1
+        if (y1 in mapX[x1+1]):
+            right = True
+            check += 1
 
     # check deadend up
     if ((y1 + 1) in mapY):
-      if (x1 in mapY[y1 + 1]):
-        check += 1
+        if (x1 in mapY[y1 + 1]):
+            up = True
+            check += 1
 
     # check deadend down
     if ((y1 - 1) in mapY):
-      if (x1 in mapY[y1 - 1]):
-        check += 1
+        if (x1 in mapY[y1 - 1]):
+            down = True
+            check += 1
 
-    if (check >= 3):
-      return float('inf')
-    
-    
+    if (check == 2):
+        if ((up and down) or (left and right)):
+            return 0
+        else:
+            if ((x1, y1) != (xd, yd)):
+                return float('inf')
+
+    return 0
+
+
+def computeObstacleCost(mapX, mapY, xd, yd):
     return 0
 
 
