@@ -75,9 +75,35 @@ def verifyNotEdge(height, width, snowball, destination):
     return 0
 
 
-def addObstacleCost(obstacles, snowball):
+def addObstacleCost(obstacles, snowball, destination):
     return 0
 
+def verifyNotInCorner(obstacles, snowballX, snowballY):
+    obstacleMap = dict(obstacles)
+    checkValue = 0
+    #deadend in right
+    deadendX = snowballX + 1
+    if (deadendX in obstacleMap and snowballY == obstacleMap[deadendX]):
+        checkValue+=1
+    # deadend in left
+    deadendX = snowballX - 1
+    if (deadendX in obstacleMap and snowballY == obstacleMap[deadendX]):
+        checkValue+=1
+    
+    #deadend up
+    deadendY = snowballY + 1
+    if (snowballX in obstacleMap and deadendY == obstacleMap[snowballX]):
+        checkValue+=1
+    
+    #deadend down
+    deadendY = snowballY - 1
+    if (snowballX in obstacleMap and deadendY == obstacleMap[snowballX]):
+        checkValue+=1
+
+    if (checkValue >= 3):
+        return float('inf')
+
+    return 0
 
 def robotTravellingCost(destination, robotLocation):
     return abs(destination[0] - robotLocation[0]) + abs(destination[1] - robotLocation[1])
@@ -103,13 +129,21 @@ def heur_alternate(state):
         y1 = snowball[1]
         size = state.snowballs[snowball]
 
+        # Early return if at goal
+        if (x1 == xd and y1 == yd):
+            return 0
+        
+
         # never go to edge unless goal is ON THE SAME Edge
         # Take acount of robot travelling to snowball
         # some how take account of obstacles without loop
         if (verifyNotEdge(state.height, state.width, snowball, destination) == float('inf')):
             return float('inf')
 
-        checkCost = addObstacleCost(state.obstacles, snowball)
+        if (verifyNotInCorner(state.obstacles, x1, y1) == float('inf')):
+            return float('inf')
+
+        checkCost = addObstacleCost(state.obstacles, snowball, destination)
             
 
         cost = cost + \
