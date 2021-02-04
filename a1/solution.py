@@ -12,7 +12,6 @@ from search import *  # for search engines
 from snowman import SnowmanState, Direction, snowman_goal_state
 from test_problems import PROBLEMS  # 20 test problems
 
-
 def getStackValue(size):
 
     if (size == 3 or size == 4 or size == 5):
@@ -74,11 +73,6 @@ def verifyNotEdge(height, width, snowball, destination):
 
     return 0
 
-
-def addObstacleCost(obstacles, snowball, destination):
-    return 0
-
-
 def constructObstacleMap(obstacles):
     result = {}
     obstacleMapX = {}
@@ -103,22 +97,6 @@ def constructObstacleMap(obstacles):
 def robotTravellingCost(destination, robotLocation):
     return abs(destination[0] - robotLocation[0]) + abs(destination[1] - robotLocation[1])
 
-
-def handleGoal(snowball, snowballs, size, xd, yd):
-    if (size == 0):
-        return True
-    elif (size == 1):
-        # make sure large is already there
-        return snowballs[(xd, yd)] == 0
-
-    elif (size == 2):
-        # make sure either large and medium already there
-        return snowballs[(xd, yd)] == 3
-
-    else:
-        return False
-
-
 def heur_alternate(state):
     # IMPLEMENT
     '''a better heuristic'''
@@ -142,29 +120,20 @@ def heur_alternate(state):
         size = state.snowballs[snowball]
 
         # Early Continue if at goal
-        if (x1 == xd and y1 == yd):
-            if (handleGoal(snowball, snowballs, size, xd, yd)):
-                continue
+        if (snowball in destination):
+          continue
 
-        # never go to edge unless goal is ON THE SAME Edge
-        # Take acount of robot travelling to snowball
-        # some how take account of obstacles without loop
         if (verifyNotEdge(state.height, state.width, snowball, destination) == float('inf')):
             return float('inf')
 
         if (verifyNotInCorner(obstacleMap['mapX'], obstacleMap['mapY'], x1, y1, xd, yd) == float('inf')):
             return float('inf')
-
-        obstacleCost = computeObstacleCost(
-            obstacleMap['mapX'], obstacleMap['mapY'], xd, yd)
-
+      
         cost = cost + \
-            ((abs(xd - x1) + abs(yd - y1)) + obstacleCost) * getStackValue(size)
+            (abs(xd - x1) + abs(yd - y1)) + computeObstacleCost(obstacleMap['mapX'], obstacleMap['mapY'],xd,yd,x1,y1) * getStackValue(size)
 
     cost = cost + robotTravellingCost(destination, state.robot)
-
     return cost
-
 
 def verifyNotInCorner(mapX, mapY, x1, y1, xd, yd):
     check = 0
@@ -205,10 +174,27 @@ def verifyNotInCorner(mapX, mapY, x1, y1, xd, yd):
 
     return 0
 
+def computeObstacleCost(mapX, mapY, xd, yd, x1, y1):
+    costXYPath = 0
+    costYXPath = 0
 
-def computeObstacleCost(mapX, mapY, xd, yd):
-    return 0
+    if (y1 in mapY):
+      if ((xd < mapY[y1][0] and x1 > mapY[y1][0]) or (xd > mapY[y1][0] and x1 < mapY[y1][0])):
+        costXYPath = 4 + len(mapY[y1])
 
+    if (xd in mapX):
+      if ((y1 < mapX[xd][0] and yd > mapX[xd][0]) or (y1 > mapX[xd][0] and yd < mapX[xd][0])):
+        costXYPath = costXYPath + 4 + len(mapX[xd])
+
+    if (x1 in mapX):
+      if ((yd < mapX[x1][0] and y1 > mapX[x1][0]) or (yd > mapX[x1][0] and y1 < mapX[x1][0])):
+        costYXPath = 4 + len(mapX[x1])
+    
+    if (yd in mapY):
+      if ((x1 < mapY[yd][0] and xd > mapY[yd][0]) or (x1 > mapY[yd][0] and xd < mapY[yd][0])):
+        costYXPath = costYXPath + 4 + len(mapY[yd])
+
+    return min(costXYPath, costYXPath)
 
 def heur_zero(state):
     '''Zero Heuristic can be used to make A* search perform uniform cost search'''
@@ -274,7 +260,7 @@ def anytime_weighted_astar(initial_state, heur_fn, weight=1., timebound=5):
                               searchResult.gval, searchResult.gval)
             tempResult = searchResult
 
-        searchResult = searchEngine.search(timebound, costBoundTuple)
+        searchResult = searchEngine.search(timebound - (os.times()[0] - start), costBoundTuple)
         end = os.times()[0] - start
 
     return tempResult
@@ -310,7 +296,7 @@ def anytime_gbfs(initial_state, heur_fn, timebound=5):
                               searchResult.gval, searchResult.gval)
             tempResult = searchResult
 
-        searchResult = searchEngine.search(timebound, costBoundTuple)
+        searchResult = searchEngine.search(timebound - (os.times()[0] - start), costBoundTuple)
         end = os.times()[0] - start
 
     return tempResult
@@ -347,13 +333,6 @@ if __name__ == "__main__":
             solved += 1
         else:
             unsolved.append(i)
-
-    # s0 = PROBLEMS[3]
-    # weight = 100
-    # final = anytime_weighted_astar(s0, heur_fn=heur_manhattan_distance, weight=weight, timebound=timebound)
-    # if (final):
-    #   print(final)
-
     print("\n*************************************")
     print("Of {} initial problems, {} were solved in less than {} seconds by this solver.".format(
         len(PROBLEMS), solved, timebound))
