@@ -126,7 +126,7 @@ def heur_alternate(state):
         if (verifyNotEdge(state.height, state.width, snowball, destination) == float('inf')):
             return float('inf')
 
-        if (verifyNotInCorner(obstacleMap['mapX'], obstacleMap['mapY'], x1, y1, xd, yd) == float('inf')):
+        if (verifyNotInCorner(x1, y1, xd, yd, state.obstacles) == float('inf')):
             return float('inf')
       
         cost = cost + \
@@ -135,35 +135,31 @@ def heur_alternate(state):
     cost = cost + robotTravellingCost(destination, state.robot)
     return cost
 
-def verifyNotInCorner(mapX, mapY, x1, y1, xd, yd):
+def verifyNotInCorner(x1, y1, xd, yd, obstacles):
     check = 0
     left = False
     right = False
     up = False
     down = False
     # check deadend left
-    if ((x1 - 1) in mapX):
-        if (y1 in mapX[x1-1]):
-            left = True
-            check += 1
+    if ((x1 - 1, y1) in obstacles):
+        left = True
+        check +=1
 
     # check deadend right
-    if ((x1 + 1) in mapX):
-        if (y1 in mapX[x1+1]):
-            right = True
-            check += 1
+    if ((x1 + 1, y1) in obstacles):
+        right = True
+        check +=1
 
     # check deadend up
-    if ((y1 + 1) in mapY):
-        if (x1 in mapY[y1 + 1]):
-            up = True
-            check += 1
+    if ((x1, y1 + 1) in obstacles):
+        up = True
+        check +=1
 
     # check deadend down
-    if ((y1 - 1) in mapY):
-        if (x1 in mapY[y1 - 1]):
-            down = True
-            check += 1
+    if ((x1, y1 - 1) in obstacles):
+        down = True
+        check +=1
 
     if (check == 2):
         if ((up and down) or (left and right)):
@@ -257,7 +253,7 @@ def anytime_weighted_astar(initial_state, heur_fn, weight=1., timebound=5):
         if (costSet == False or searchResult.gval < costBoundTuple[0]):
             costSet = True
             costBoundTuple = (searchResult.gval,
-                              searchResult.gval, searchResult.gval)
+                              float('inf'), searchResult.gval)
             tempResult = searchResult
 
         searchResult = searchEngine.search(timebound - (os.times()[0] - start), costBoundTuple)
@@ -319,6 +315,7 @@ if __name__ == "__main__":
         print("PROBLEM {}".format(i))
 
         s0 = PROBLEMS[i]  # Final problems are hardest
+        # s0.print_state()
         weight = 100  # we will start with a large weight so you can experiment with rate at which it decrements
         final = anytime_weighted_astar(
             s0, heur_fn=heur_alternate, weight=weight, timebound=timebound)
