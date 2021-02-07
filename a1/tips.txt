@@ -1,0 +1,5 @@
+1) See the pitfalls of Manhattan Heuristic, any more constraints you add will likely improve it
+2) Focus on avoiding paths that will lead to deadends, like moving the snowball to the edge
+3) Try programming the heuristic such that it is attracted first to the Large, then Medium, then Small snowball inorder to build it
+4) Somehow take account of obstacles, that your robot must take into account when planning its route
+5) Figure out ways that will make your heuristic return early and avoid unnecessary loops as your primary aim is to beat the benchmark rather than solve everything
