@@ -94,8 +94,8 @@ def constructObstacleMap(obstacles):
     return result
 
 
-def robotTravellingCost(destination, robotLocation):
-    return abs(destination[0] - robotLocation[0]) + abs(destination[1] - robotLocation[1])
+def travellingCost(destination, start):
+    return abs(destination[0] - start[0]) + abs(destination[1] - start[1])
 
 def heur_alternate(state):
     # IMPLEMENT
@@ -111,8 +111,25 @@ def heur_alternate(state):
     cost = 0
     xd = destination[0]
     yd = destination[1]
+    goalDistanceMap = {
+        's': float('inf'),
+        'm': float('inf'),
+        'l': float('inf')
+    }
 
-    obstacleMap = constructObstacleMap(state.obstacles)
+    robotDistanceMap = {
+        's': float('inf'),
+        'm': float('inf'),
+        'l': float('inf')
+    }
+
+    cordinateMap = {
+        's': destination,
+        'm': destination,
+        'l': destination
+    }
+
+    # obstacleMap = constructObstacleMap(state.obstacles)
 
     for snowball in snowballs:
         x1 = snowball[0]
@@ -123,16 +140,76 @@ def heur_alternate(state):
         if (snowball in destination):
           continue
 
+        if (snowball in state.obstacles):
+            return float('inf')
+
         if (verifyNotEdge(state.height, state.width, snowball, destination) == float('inf')):
             return float('inf')
 
         if (verifyNotInCorner(x1, y1, xd, yd, state.obstacles) == float('inf')):
             return float('inf')
-      
-        cost = cost + \
-            (abs(xd - x1) + abs(yd - y1)) + computeObstacleCost(obstacleMap['mapX'], obstacleMap['mapY'],xd,yd,x1,y1) * getStackValue(size)
+        
+        if (size == 0):
+            goalDistanceMap['l'] = travellingCost(destination, snowball)
+            robotDistanceMap['l'] = travellingCost(snowball, state.robot)
+            cordinateMap['l'] = snowball
+        elif (size == 1):
+            goalDistanceMap['m'] = travellingCost(destination, snowball)
+            robotDistanceMap['m'] = travellingCost(snowball, state.robot)
+            cordinateMap['m'] = snowball
+        elif (size == 2):
+            goalDistanceMap['s'] = travellingCost(destination, snowball)
+            robotDistanceMap['s'] = travellingCost(snowball, state.robot)
+            cordinateMap['s'] = snowball
+        elif (size == 3):
+            goalDistanceMap['l'] = travellingCost(destination, snowball)
+            goalDistanceMap['m'] = travellingCost(destination, snowball)
 
-    cost = cost + robotTravellingCost(destination, state.robot)
+            robotDistanceMap['l'] = travellingCost(snowball, state.robot)
+            robotDistanceMap['m'] = travellingCost(snowball, state.robot)
+
+            cordinateMap['l'] = snowball
+            cordinateMap['m'] = snowball
+        elif (size == 4):
+            goalDistanceMap['m'] = travellingCost(destination, snowball)
+            goalDistanceMap['s'] = travellingCost(destination, snowball)
+
+            robotDistanceMap['s'] = travellingCost(snowball, state.robot)
+            robotDistanceMap['m'] = travellingCost(snowball, state.robot)
+
+            cordinateMap['m'] = snowball
+            cordinateMap['s'] = snowball
+        elif (size == 5):
+            goalDistanceMap['s'] = travellingCost(destination, snowball)
+            goalDistanceMap['l'] = travellingCost(destination, snowball)
+
+            robotDistanceMap['l'] = travellingCost(snowball, state.robot)
+            robotDistanceMap['s'] = travellingCost(snowball, state.robot)
+
+            cordinateMap['l'] = snowball
+            cordinateMap['s'] = snowball
+        else:
+            goalDistanceMap['s'] = travellingCost(destination, snowball)
+            goalDistanceMap['l'] = travellingCost(destination, snowball)
+            goalDistanceMap['m'] = travellingCost(destination, snowball)
+
+            robotDistanceMap['l'] = travellingCost(snowball, state.robot)
+            robotDistanceMap['m'] = travellingCost(snowball, state.robot)
+            robotDistanceMap['s'] = travellingCost(snowball, state.robot)
+
+            cordinateMap['l'] = snowball
+            cordinateMap['m'] = snowball
+            cordinateMap['s'] = snowball
+
+        cost = cost + \
+            (abs(xd - x1) + abs(yd - y1)) * getStackValue(size)
+
+    if (goalDistanceMap['l'] != 0):
+        cost = cost + robotDistanceMap['l']
+    elif (goalDistanceMap['m'] != 0):
+        cost = cost + robotDistanceMap['m']
+    elif (goalDistanceMap['s'] != 0):
+        cost = cost + robotDistanceMap['s']
     return cost
 
 def verifyNotInCorner(x1, y1, xd, yd, obstacles):
@@ -167,6 +244,9 @@ def verifyNotInCorner(x1, y1, xd, yd, obstacles):
         else:
             if ((x1, y1) != (xd, yd)):
                 return float('inf')
+    
+    if (check > 2):
+        return float('inf')
 
     return 0
 
