@@ -122,15 +122,7 @@ def heur_alternate(state):
         'm': float('inf'),
         'l': float('inf')
     }
-
-    cordinateMap = {
-        's': destination,
-        'm': destination,
-        'l': destination
-    }
-
-    # obstacleMap = constructObstacleMap(state.obstacles)
-
+    
     for snowball in snowballs:
         x1 = snowball[0]
         y1 = snowball[1]
@@ -152,15 +144,12 @@ def heur_alternate(state):
         if (size == 0):
             goalDistanceMap['l'] = travellingCost(destination, snowball)
             robotDistanceMap['l'] = travellingCost(snowball, state.robot)
-            cordinateMap['l'] = snowball
         elif (size == 1):
             goalDistanceMap['m'] = travellingCost(destination, snowball)
             robotDistanceMap['m'] = travellingCost(snowball, state.robot)
-            cordinateMap['m'] = snowball
         elif (size == 2):
             goalDistanceMap['s'] = travellingCost(destination, snowball)
             robotDistanceMap['s'] = travellingCost(snowball, state.robot)
-            cordinateMap['s'] = snowball
         elif (size == 3):
             goalDistanceMap['l'] = travellingCost(destination, snowball)
             goalDistanceMap['m'] = travellingCost(destination, snowball)
@@ -168,8 +157,6 @@ def heur_alternate(state):
             robotDistanceMap['l'] = travellingCost(snowball, state.robot)
             robotDistanceMap['m'] = travellingCost(snowball, state.robot)
 
-            cordinateMap['l'] = snowball
-            cordinateMap['m'] = snowball
         elif (size == 4):
             goalDistanceMap['m'] = travellingCost(destination, snowball)
             goalDistanceMap['s'] = travellingCost(destination, snowball)
@@ -177,8 +164,6 @@ def heur_alternate(state):
             robotDistanceMap['s'] = travellingCost(snowball, state.robot)
             robotDistanceMap['m'] = travellingCost(snowball, state.robot)
 
-            cordinateMap['m'] = snowball
-            cordinateMap['s'] = snowball
         elif (size == 5):
             goalDistanceMap['s'] = travellingCost(destination, snowball)
             goalDistanceMap['l'] = travellingCost(destination, snowball)
@@ -186,8 +171,6 @@ def heur_alternate(state):
             robotDistanceMap['l'] = travellingCost(snowball, state.robot)
             robotDistanceMap['s'] = travellingCost(snowball, state.robot)
 
-            cordinateMap['l'] = snowball
-            cordinateMap['s'] = snowball
         else:
             goalDistanceMap['s'] = travellingCost(destination, snowball)
             goalDistanceMap['l'] = travellingCost(destination, snowball)
@@ -196,11 +179,6 @@ def heur_alternate(state):
             robotDistanceMap['l'] = travellingCost(snowball, state.robot)
             robotDistanceMap['m'] = travellingCost(snowball, state.robot)
             robotDistanceMap['s'] = travellingCost(snowball, state.robot)
-
-            cordinateMap['l'] = snowball
-            cordinateMap['m'] = snowball
-            cordinateMap['s'] = snowball
-
         cost = cost + \
             (abs(xd - x1) + abs(yd - y1)) * getStackValue(size)
 
