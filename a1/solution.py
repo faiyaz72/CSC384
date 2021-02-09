@@ -276,7 +276,7 @@ def fval_function(sN, weight):
     return (sN.hval * weight) + sN.gval
 
 
-def anytime_weighted_astar(initial_state, heur_fn, weight=1., timebound=5):
+def anytime_weighted_astar(initial_state, heur_fn, weight=50., timebound=5):
     # IMPLEMENT
     '''Provides an implementation of anytime weighted a-star, as described in the HW1 handout'''
     '''INPUT: a sokoban state that represents the start state and a timebound (number of seconds)'''
