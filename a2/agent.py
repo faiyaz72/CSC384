@@ -108,7 +108,7 @@ def alphabeta_min_node(board, color, alpha, beta, limit, caching = 0, ordering =
             playBoard = play_move(board, color, move[0], move[1])
             nodeOrderingList.append((playBoard, move))
         
-        nodeOrderingList.sort(key=lambda j: compute_utility(j[0], getOpponent(color)), reverse=True)
+        nodeOrderingList.sort(key=lambda j: compute_utility(j[0], color), reverse=True)
 
         for orderedMove in nodeOrderingList:
             utility = alphabeta_max_node(orderedMove[0], getOpponent(color), alpha, beta, limit - 1, caching, ordering)[1]
@@ -148,7 +148,7 @@ def alphabeta_max_node(board, color, alpha, beta, limit, caching = 0, ordering =
             playBoard = play_move(board, color, move[0], move[1])
             nodeOrderingList.append((playBoard, move))
         
-        nodeOrderingList.sort(key=lambda j: compute_utility(j[0], getOpponent(color)), reverse=True)
+        nodeOrderingList.sort(key=lambda j: compute_utility(j[0], color), reverse=True)
 
         for orderedMove in nodeOrderingList:
             utility = alphabeta_min_node(orderedMove[0], getOpponent(color), alpha, beta, limit - 1, caching, ordering)[1]
