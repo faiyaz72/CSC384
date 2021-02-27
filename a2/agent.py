@@ -49,7 +49,7 @@ def minimax_min_node(board, color, limit, caching = 0):
     bestMove = possibleMoves[0]
     for move in possibleMoves:
         moveBoard = play_move(board, color, move[0], move[1])
-        utility = minimax_max_node(moveBoard, getOpponent(color), limit-1, caching)[1]
+        utility = minimax_max_node(moveBoard, getOpponent(color), limit - 1, caching)[1]
         if (minUtility > utility):
             minUtility = utility
             bestMove = move
@@ -69,7 +69,7 @@ def minimax_max_node(board, color, limit, caching = 0): #returns highest possibl
     bestMove = possibleMoves[0]
     for move in possibleMoves:
         moveBoard = play_move(board, color, move[0], move[1])
-        utility = minimax_min_node(moveBoard, getOpponent(color), limit-1, caching)[1]
+        utility = minimax_min_node(moveBoard, getOpponent(color), limit - 1, caching)[1]
         if (maxUtility < utility):
             maxUtility = utility
             bestMove = move
