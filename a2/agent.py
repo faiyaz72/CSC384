@@ -13,9 +13,23 @@ def eprint(*args, **kwargs): #you can use this for debugging, as it will print t
     print(*args, file=sys.stderr, **kwargs)
     
 # Method to compute utility value of terminal state
+
+def getOpponent(color):
+    if (color == 1):
+        return 2
+    else:
+        return 1
+
 def compute_utility(board, color):
-    #IMPLEMENT
-    return 0 #change this!
+
+    # utility should be calculated as the number of disks of the player's colour minus the number of disks of the opponent
+    # 1 is dark
+    # 2 is light
+    diskNum = get_score(board)
+    if (color == 1):
+        return diskNum[0] - diskNum[1]
+    else:
+        return diskNum[1] - diskNum[0]
 
 # Better heuristic value of board
 def compute_heuristic(board, color): #not implemented, optional
@@ -25,11 +39,42 @@ def compute_heuristic(board, color): #not implemented, optional
 ############ MINIMAX ###############################
 def minimax_min_node(board, color, limit, caching = 0):
     #IMPLEMENT (and replace the line below)
-    return ((0,0),0)
+    possibleMoves = get_possible_moves(board, color)
+    minUtility = float("inf")
+    bestMove = None
+
+    if (possibleMoves == [] or limit == 0):
+        return (bestMove, -1 * compute_utility(board, color))
+
+    bestMove = possibleMoves[0]
+    for move in possibleMoves:
+        moveBoard = play_move(board, color, move[0], move[1])
+        utility = minimax_max_node(moveBoard, getOpponent(color), limit-1, caching)[1]
+        if (minUtility > utility):
+            minUtility = utility
+            bestMove = move
+
+    return (bestMove, minUtility)
 
 def minimax_max_node(board, color, limit, caching = 0): #returns highest possible utility
     #IMPLEMENT (and replace the line below)
-    return ((0,0),0)
+    
+    possibleMoves = get_possible_moves(board, color)
+    maxUtility = float("-inf")
+    bestMove = None
+
+    if (possibleMoves == [] or limit == 0):
+        return (bestMove, compute_utility(board, color))
+
+    bestMove = possibleMoves[0]
+    for move in possibleMoves:
+        moveBoard = play_move(board, color, move[0], move[1])
+        utility = minimax_min_node(moveBoard, getOpponent(color), limit-1, caching)[1]
+        if (maxUtility < utility):
+            maxUtility = utility
+            bestMove = move
+
+    return (bestMove, maxUtility)
 
 def select_move_minimax(board, color, limit, caching = 0):
     """
@@ -45,7 +90,7 @@ def select_move_minimax(board, color, limit, caching = 0):
     If caching is OFF (i.e. 0), do NOT use state caching to reduce the number of state evaluations.    
     """
     #IMPLEMENT (and replace the line below)
-    return (0,0) #change this!
+    return minimax_max_node(board, color, limit, caching)[0]
 
 ############ ALPHA-BETA PRUNING #####################
 def alphabeta_min_node(board, color, alpha, beta, limit, caching = 0, ordering = 0):
