@@ -9,6 +9,12 @@ import time
 # You can use the functions in othello_shared to write your AI
 from othello_shared import find_lines, get_possible_moves, get_score, play_move
 
+maxCache = dict()
+minCache = dict()
+alphaMaxCache = dict()
+alphaMinCache = dict()
+
+
 def eprint(*args, **kwargs): #you can use this for debugging, as it will print to sterr and not stdout
     print(*args, file=sys.stderr, **kwargs)
     
@@ -99,8 +105,15 @@ def alphabeta_min_node(board, color, alpha, beta, limit, caching = 0, ordering =
     possibleMoves = get_possible_moves(board, color)
     minUtility = float("inf")
 
+    if (caching == 1):
+        if (isinstance(board, list)):
+            board = tuple(tuple(x) for x in board)
+        if ((board, color) in alphaMinCache):
+            return alphaMinCache[(board, color)]
+
     if (possibleMoves == [] or limit == 0):
-        return (bestMove, -1 * compute_utility(board, color))
+        utilityScore = -1 * compute_utility(board, color)
+        return (bestMove, utilityScore)
 
     if (ordering == 1):
         nodeOrderingList = []
@@ -130,6 +143,10 @@ def alphabeta_min_node(board, color, alpha, beta, limit, caching = 0, ordering =
                 return (bestMove, minUtility)
             beta = min(beta, minUtility)
     
+    if (caching == 1):
+        if (isinstance(board, list)):
+            board = tuple(tuple(x) for x in board)
+        alphaMinCache[(board, color)] = (bestMove, minUtility)
     return (bestMove, minUtility)
     
 
@@ -139,8 +156,15 @@ def alphabeta_max_node(board, color, alpha, beta, limit, caching = 0, ordering =
     possibleMoves = get_possible_moves(board, color)
     maxUtility = float("-inf")
 
+    if (caching == 1):
+        if (isinstance(board, list)):
+            board = tuple(tuple(x) for x in board)
+        if ((board, color) in alphaMaxCache):
+            return alphaMaxCache[(board, color)]
+
     if (possibleMoves == [] or limit == 0):
-        return (bestMove, compute_utility(board, color))
+        utilityScore = compute_utility(board, color)
+        return (bestMove, utilityScore)
 
     if (ordering == 1):
         nodeOrderingList = []
@@ -169,6 +193,10 @@ def alphabeta_max_node(board, color, alpha, beta, limit, caching = 0, ordering =
                 return (bestMove, maxUtility)
             alpha = max(alpha, maxUtility)
     
+    if (caching == 1):
+        if (isinstance(board, list)):
+            board = tuple(tuple(x) for x in board)
+        alphaMaxCache[(board, color)] = (bestMove, maxUtility)
     return (bestMove, maxUtility)
 
 
