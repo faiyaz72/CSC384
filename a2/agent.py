@@ -45,17 +45,17 @@ def compute_heuristic(board, color): #not implemented, optional
 ############ MINIMAX ###############################
 def minimax_min_node(board, color, limit, caching = 0):
     #IMPLEMENT (and replace the line below)
-    possibleMoves = get_possible_moves(board, color)
+    possibleMoves = get_possible_moves(board, getOpponent(color))
     minUtility = float("inf")
     bestMove = None
 
     if (possibleMoves == [] or limit == 0):
-        return (bestMove, -1 * compute_utility(board, color))
+        return (bestMove, -1 * compute_utility(board, getOpponent(color)))
 
     bestMove = possibleMoves[0]
     for move in possibleMoves:
-        moveBoard = play_move(board, color, move[0], move[1])
-        utility = minimax_max_node(moveBoard, getOpponent(color), limit - 1, caching)[1]
+        moveBoard = play_move(board, getOpponent(color), move[0], move[1])
+        utility = minimax_max_node(moveBoard, color, limit - 1, caching)[1]
         if (minUtility > utility):
             minUtility = utility
             bestMove = move
@@ -75,7 +75,7 @@ def minimax_max_node(board, color, limit, caching = 0): #returns highest possibl
     bestMove = possibleMoves[0]
     for move in possibleMoves:
         moveBoard = play_move(board, color, move[0], move[1])
-        utility = minimax_min_node(moveBoard, getOpponent(color), limit - 1, caching)[1]
+        utility = minimax_min_node(moveBoard, color, limit - 1, caching)[1]
         if (maxUtility < utility):
             maxUtility = utility
             bestMove = move
@@ -102,29 +102,29 @@ def select_move_minimax(board, color, limit, caching = 0):
 def alphabeta_min_node(board, color, alpha, beta, limit, caching = 0, ordering = 0):
     
     bestMove = None
-    possibleMoves = get_possible_moves(board, color)
+    possibleMoves = get_possible_moves(board, getOpponent(color))
     minUtility = float("inf")
 
     if (caching == 1):
         if (isinstance(board, list)):
             board = tuple(tuple(x) for x in board)
-        if ((board, color) in alphaMinCache):
-            return alphaMinCache[(board, color)]
+        if ((board, getOpponent(color)) in alphaMinCache):
+            return alphaMinCache[(board, getOpponent(color))]
 
     if (possibleMoves == [] or limit == 0):
-        utilityScore = -1 * compute_utility(board, color)
+        utilityScore = -1 * compute_utility(board, getOpponent(color))
         return (bestMove, utilityScore)
 
     if (ordering == 1):
         nodeOrderingList = []
         for move in possibleMoves:
-            playBoard = play_move(board, color, move[0], move[1])
+            playBoard = play_move(board, getOpponent(color), move[0], move[1])
             nodeOrderingList.append((playBoard, move))
         
-        nodeOrderingList.sort(key=lambda j: compute_utility(j[0], color), reverse=True)
+        nodeOrderingList.sort(key=lambda j: compute_utility(j[0], getOpponent(color)), reverse=True)
 
         for orderedMove in nodeOrderingList:
-            utility = alphabeta_max_node(orderedMove[0], getOpponent(color), alpha, beta, limit - 1, caching, ordering)[1]
+            utility = alphabeta_max_node(orderedMove[0], color, alpha, beta, limit - 1, caching, ordering)[1]
             if (minUtility > utility):
                 minUtility = utility
                 bestMove = orderedMove[1]
@@ -134,8 +134,8 @@ def alphabeta_min_node(board, color, alpha, beta, limit, caching = 0, ordering =
 
     else:
         for move in possibleMoves:
-            moveBoard = play_move(board, color, move[0], move[1])
-            utility = alphabeta_max_node(moveBoard, getOpponent(color), alpha, beta, limit - 1, caching, ordering)[1]
+            moveBoard = play_move(board, getOpponent(color), move[0], move[1])
+            utility = alphabeta_max_node(moveBoard, color, alpha, beta, limit - 1, caching, ordering)[1]
             if (minUtility > utility):
                 minUtility = utility
                 bestMove = move
@@ -146,7 +146,7 @@ def alphabeta_min_node(board, color, alpha, beta, limit, caching = 0, ordering =
     if (caching == 1):
         if (isinstance(board, list)):
             board = tuple(tuple(x) for x in board)
-        alphaMinCache[(board, color)] = (bestMove, minUtility)
+        alphaMinCache[(board, getOpponent(color))] = (bestMove, minUtility)
     return (bestMove, minUtility)
     
 
@@ -175,7 +175,7 @@ def alphabeta_max_node(board, color, alpha, beta, limit, caching = 0, ordering =
         nodeOrderingList.sort(key=lambda j: compute_utility(j[0], color), reverse=True)
 
         for orderedMove in nodeOrderingList:
-            utility = alphabeta_min_node(orderedMove[0], getOpponent(color), alpha, beta, limit - 1, caching, ordering)[1]
+            utility = alphabeta_min_node(orderedMove[0], color, alpha, beta, limit - 1, caching, ordering)[1]
             if (maxUtility < utility):
                 maxUtility = utility
                 bestMove = orderedMove[1]
@@ -185,7 +185,7 @@ def alphabeta_max_node(board, color, alpha, beta, limit, caching = 0, ordering =
     else:    
         for move in possibleMoves:
             moveBoard = play_move(board, color, move[0], move[1])
-            utility = alphabeta_min_node(moveBoard, getOpponent(color), alpha, beta, limit - 1, caching, ordering)[1]
+            utility = alphabeta_min_node(moveBoard, color, alpha, beta, limit - 1, caching, ordering)[1]
             if (maxUtility < utility):
                 maxUtility = utility
                 bestMove = move
