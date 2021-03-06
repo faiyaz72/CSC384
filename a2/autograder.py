@@ -18,20 +18,20 @@ bigboards = [((0, 0, 0, 0, 0, 0), (0, 0, 2, 2, 0, 0), (0, 1, 1, 2, 2, 0), (2, 2,
 ((0, 0, 0, 0, 0, 0), (0, 0, 0, 2, 0, 0), (0, 1, 2, 1, 1, 0), (0, 2, 2, 2, 0, 0), (0, 1, 0, 0, 0, 0), (0, 0, 0, 0, 0, 0))]
 
 #Select what to test
-test_compute_utility = False
-test_alphabeta_min_node_1 = False
-test_alphabeta_max_node_1 = False
+test_compute_utility = True
+test_alphabeta_min_node_1 = True
+test_alphabeta_max_node_1 = True
 test_minimax_min_node_1 = True
 test_minimax_max_node_1 = True
-test_alphabeta_min_node_2 = False
-test_alphabeta_max_node_2 = False
-test_minimax_min_node_2 = False
-test_minimax_max_node_2 = False
+test_alphabeta_min_node_2 = True
+test_alphabeta_max_node_2 = True
+test_minimax_min_node_2 = True
+test_minimax_max_node_2 = True
 test_caching_big = False
-test_ordering = False
-test_select_move_minimax = False
-test_select_move_alphabeta = False
-test_select_move_equal = False
+test_ordering = True
+test_select_move_minimax = True
+test_select_move_alphabeta = True
+test_select_move_equal = True
 
 if test_compute_utility:
 
@@ -203,7 +203,7 @@ if test_minimax_min_node_1:
       (move, value) = minimax_min_node(board, color, 1, 0)
       answer = answers[i][0]
       answer_value = answers[i][1]
-
+      # print("My answer {}, {} | Actual answer {}, {}".format(move, value, answer, answer_value))
       if (answer[0] == move[0] and answer[1] == move[1]):
         correct+=1
       if (answer_value == value):
@@ -298,7 +298,7 @@ if test_minimax_min_node_2:
       (move, value) = minimax_min_node(board, color, 1, 0)
       answer = answers[i][0]
       answer_value = answers[i][1]
-
+      # print("My answer {}, {} | Actual answer {}, {}".format(move, value, answer, answer_value))
       if (answer[0] == move[0] and answer[1] == move[1]):
         correct+=1
       if (answer_value == value):
