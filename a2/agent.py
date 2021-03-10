@@ -36,11 +36,32 @@ def compute_utility(board, color):
         return diskNum[0] - diskNum[1]
     else:
         return diskNum[1] - diskNum[0]
-
+        
 # Better heuristic value of board
-def compute_heuristic(board, color): #not implemented, optional
-    #IMPLEMENT
-    return 0 #change this!
+def compute_heuristic(board, color): 
+    
+    score = 0
+    diskNum = get_score(board)
+    if (color == 1):
+        score = diskNum[0] - diskNum[1]
+    else:
+        score = diskNum[1] - diskNum[0]
+    
+    # add extra points for achieving corners
+    totalRows = len(board)
+    score = addCornerScores(board, color, score, totalRows)
+    return score
+
+def addCornerScores(board, color, score, totalRows):
+    if (board[0][0] == color):
+        score = score + 10
+    if (board[0][totalRows - 1] == color):
+        score = score + 10
+    if (board[totalRows - 1][0] == color):
+        score = score + 10
+    if (board[totalRows - 1][totalRows - 1] == color):
+        score = score + 10
+    return score
 
 ############ MINIMAX ###############################
 def minimax_min_node(board, color, limit, caching = 0):
