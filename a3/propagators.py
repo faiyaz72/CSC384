@@ -102,5 +102,13 @@ def prop_GAC(csp, newVar=None):
 
 def ord_mrv(csp):
     ''' return variable according to the Minimum Remaining Values heuristic '''
-    #IMPLEMENT
+    smallestVariable = None
+    smallestDomainSize = float("inf")
+    for variable in csp.vars:
+        variableDomainSize = variable.cur_domain_size()
+        if (variableDomainSize < smallestDomainSize):
+            smallestVariable = variable
+            smallestDomainSize = variableDomainSize
+        
+    return smallestVariable
 	
