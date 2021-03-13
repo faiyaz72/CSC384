@@ -88,6 +88,19 @@ def prop_BT(csp, newVar=None):
                 return False, []
     return True, []
 
+def FCCheckHelper(constraint, pruneList):
+
+    variable = constraint.get_unasgn_vars()[0]
+    possibleDomains = variable.cur_domain()
+    for domain in possibleDomains:
+        if (not constraint.has_support(variable, domain)):
+            # prune this variable and value
+            pruneTuple = (variable, domain)
+            if (pruneTuple not in pruneList):
+                variable.prune_value(domain)
+                pruneList.append(pruneTuple)
+    return not variable.cur_domain_size() == 0
+
 def prop_FC(csp, newVar=None):
     '''Do forward checking. That is check constraints with 
        only one uninstantiated variable. Remember to keep 
@@ -99,31 +112,13 @@ def prop_FC(csp, newVar=None):
         for constraint in csp.get_all_cons():
             # check for only 1 uninstiated
             if (constraint.get_n_unasgn() == 1):
-                variable = constraint.get_unasgn_vars()[0]
-                possibleDomains = variable.cur_domain()
-                for domain in possibleDomains:
-                    if (not constraint.has_support(variable, domain)):
-                        # prune this variable and value
-                        pruneTuple = (variable, domain)
-                        if (pruneTuple not in pruneList):
-                            variable.prune_value(domain)
-                            pruneList.append(pruneTuple)
-                if (variable.cur_domain_size() == 0):
+                if (not FCCheckHelper(constraint, pruneList)):
                     return (False, pruneList)
                         
     else:
         for constraint in csp.get_cons_with_var(newVar):
             if (constraint.get_n_unasgn() == 1):
-                variable = constraint.get_unasgn_vars()[0]
-                possibleDomains = variable.cur_domain()
-                for domain in possibleDomains:
-                    if (not constraint.has_support(variable, domain)):
-                        # prune this variable and value
-                        pruneTuple = (variable, domain)
-                        if (pruneTuple not in pruneList):
-                            variable.prune_value(domain)
-                            pruneList.append(pruneTuple)
-                if (variable.cur_domain_size() == 0):
+                if (not FCCheckHelper(constraint, pruneList)):
                     return (False, pruneList)
 
     return (True, pruneList)
