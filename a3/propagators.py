@@ -93,6 +93,41 @@ def prop_FC(csp, newVar=None):
        only one uninstantiated variable. Remember to keep 
        track of all pruned variable,value pairs and return '''
     
+    # If newVar is None, you must forward check all constraints. Else, if newVar=var, only check constraints containing newVar.
+    pruneList = []
+    if (newVar == None):
+        for constraint in csp.get_all_cons():
+            # check for only 1 uninstiated
+            if (constraint.get_n_unasgn() == 1):
+                variable = constraint.get_unasgn_vars()[0]
+                possibleDomains = variable.cur_domain()
+                for domain in possibleDomains:
+                    if (not constraint.has_support(variable, domain)):
+                        # prune this variable and value
+                        pruneTuple = (variable, domain)
+                        if (pruneTuple not in pruneList):
+                            variable.prune_value(domain)
+                            pruneList.append(pruneTuple)
+                if (variable.cur_domain_size() == 0):
+                    return (False, pruneList)
+                        
+    else:
+        for constraint in csp.get_cons_with_var(newVar):
+            if (constraint.get_n_unasgn() == 1):
+                variable = constraint.get_unasgn_vars()[0]
+                possibleDomains = variable.cur_domain()
+                for domain in possibleDomains:
+                    if (not constraint.has_support(variable, domain)):
+                        # prune this variable and value
+                        pruneTuple = (variable, domain)
+                        if (pruneTuple not in pruneList):
+                            variable.prune_value(domain)
+                            pruneList.append(pruneTuple)
+                if (variable.cur_domain_size() == 0):
+                    return (False, pruneList)
+
+    return (True, pruneList)
+    
 
 def prop_GAC(csp, newVar=None):
     '''Do GAC propagation. If newVar is None we do initial GAC enforce 
