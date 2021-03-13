@@ -104,12 +104,11 @@ def ord_mrv(csp):
     ''' return variable according to the Minimum Remaining Values heuristic '''
     smallestVariable = None
     smallestDomainSize = float("inf")
-    for variable in csp.vars:
-        if (not variable.is_assigned()):
-            variableDomainSize = variable.cur_domain_size()
-            if (variableDomainSize < smallestDomainSize):
-                smallestVariable = variable
-                smallestDomainSize = variableDomainSize
+    for variable in csp.get_all_unasgn_vars():
+        variableDomainSize = variable.cur_domain_size()
+        if (variableDomainSize < smallestDomainSize):
+            smallestVariable = variable
+            smallestDomainSize = variableDomainSize
         
     return smallestVariable
 	
