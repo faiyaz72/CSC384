@@ -92,7 +92,7 @@ def prop_FC(csp, newVar=None):
     '''Do forward checking. That is check constraints with 
        only one uninstantiated variable. Remember to keep 
        track of all pruned variable,value pairs and return '''
-    #IMPLEMENT
+    
 
 def prop_GAC(csp, newVar=None):
     '''Do GAC propagation. If newVar is None we do initial GAC enforce 
@@ -105,10 +105,11 @@ def ord_mrv(csp):
     smallestVariable = None
     smallestDomainSize = float("inf")
     for variable in csp.vars:
-        variableDomainSize = variable.cur_domain_size()
-        if (variableDomainSize < smallestDomainSize):
-            smallestVariable = variable
-            smallestDomainSize = variableDomainSize
+        if (not variable.is_assigned()):
+            variableDomainSize = variable.cur_domain_size()
+            if (variableDomainSize < smallestDomainSize):
+                smallestVariable = variable
+                smallestDomainSize = variableDomainSize
         
     return smallestVariable
 	
