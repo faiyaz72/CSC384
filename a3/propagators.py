@@ -1,6 +1,8 @@
 #Look for #IMPLEMENT tags in this file. These tags indicate what has
 #to be implemented to complete problem solution.  
 
+from collections import deque
+
 '''This file will contain different constraint propagators to be used within 
    bt_search.
 
@@ -128,7 +130,64 @@ def prop_GAC(csp, newVar=None):
     '''Do GAC propagation. If newVar is None we do initial GAC enforce 
        processing all constraints. Otherwise we do GAC enforce with
        constraints containing newVar on GAC Queue'''
-    #IMPLEMENT
+    
+    pruneList = []
+    constraintQueue = deque()
+    if (newVar == None):
+        for constraint in csp.get_all_cons():
+            constraintQueue.append(constraint)
+        while len(constraintQueue) > 0:
+            currentConstraint = constraintQueue.pop()
+            currentScopeList = currentConstraint.get_scope()
+            for scope in currentScopeList:
+                possibleDomains = scope.cur_domain()
+                for domain in possibleDomains:
+                    if (not currentConstraint.has_support(scope, domain)):
+                        pruneTuple = (scope, domain)
+                        if (pruneTuple not in pruneList):
+                            scope.prune_value(domain)
+                            pruneList.append(pruneTuple)
+                        if (scope.cur_domain_size() == 0):
+                            while not len(constraintQueue) == 0:
+                                constraintQueue.pop()
+                            return (False, pruneList)
+                        else:
+                            ## Add affected constraints
+                            for addConstraint in csp.get_cons_with_var(scope):
+                                if (addConstraint not in constraintQueue):
+                                    constraintQueue.append(addConstraint)
+    else:
+        ## Prune all values that are unassigned in this variable
+        for domain in newVar.cur_domain():
+            if (domain != newVar.get_assigned_value()):
+                pruneTuple = (newVar, domain)
+                if (pruneTuple not in pruneList):
+                    pruneList.append(pruneTuple)
+                    newVar.prune_value(domain)
+            
+        for constraint in csp.get_cons_with_var(newVar):
+            constraintQueue.append(constraint)
+        while len(constraintQueue) > 0:
+            currentConstraint = constraintQueue.pop()
+            currentScopeList = currentConstraint.get_scope()
+            for scope in currentScopeList:
+                possibleDomains = scope.cur_domain()
+                for domain in possibleDomains:
+                    if (not currentConstraint.has_support(scope, domain)):
+                        pruneTuple = (scope, domain)
+                        if (pruneTuple not in pruneList):
+                            scope.prune_value(domain)
+                            pruneList.append(pruneTuple)
+                        if (scope.cur_domain_size() == 0):
+                            while not len(constraintQueue) == 0:
+                                constraintQueue.pop()
+                            return (False, pruneList)
+                        else:
+                            ## Add affected constraints
+                            for addConstraint in csp.get_cons_with_var(scope):
+                                if (addConstraint not in constraintQueue):
+                                    constraintQueue.append(addConstraint)
+    return (True, pruneList)
 
 def ord_mrv(csp):
     ''' return variable according to the Minimum Remaining Values heuristic '''
