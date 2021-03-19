@@ -8,6 +8,128 @@ Construct and return Tenner Grid CSP models.
 from cspbase import *
 import itertools
 
+def constructVariableArray(board):
+  result = []
+  totalRows = len(board)
+  domain = [0, 1, 2, 3, 4, 5, 6, 7, 8 ,9]
+  for row in range(totalRows):
+    variableRowList = []
+    for column in range(10):
+      if (board[row][column] != -1):
+        value = board[row][column]
+        variable = Variable("Row " + str(row) + " Column " + str(column), [value]) # Change to current?
+        variable.assign(value)
+      else:
+        variable = Variable("Row " + str(row) + " Column " + str(column), domain)
+      variableRowList.append(variable)
+
+    result.append(variableRowList)
+  
+  return result
+
+def getSatisfiedTuplesList(current, compareVariable):
+  result = []
+  for checkTuple in itertools.product(current.domain(), compareVariable.domain()):
+    if (checkTuple[0] != checkTuple[1]):
+      result.append(checkTuple)
+  return result
+
+def getAdjDiaRowConstraints(constraintList, totalRows, cspVariableList):
+
+  # topLeft  = array[ x - 1 ][ y - 1 ]
+  # topRight = array[ x + 1 ][ y - 1 ]
+  # botLeft  = array[ x - 1 ][ y + 1 ]
+  # botRight = array[ x + 1 ][ y + 1 ]
+  for row in range(totalRows):
+    for column in range(10):
+      current = cspVariableList[row][column]
+      #Check top constraint
+      if (row != 0):
+        compareVariable = cspVariableList[row - 1][column]
+        constraint = Constraint("TopAdj {},{}|{},{}".format(row, column, row-1, column), [current, compareVariable])
+        satisfiedTuplesList = getSatisfiedTuplesList(current, compareVariable)
+        constraint.add_satisfying_tuples(satisfiedTuplesList)
+        constraintList.append(constraint)
+
+      # Check topRight Constraint
+      if (row != 0 and column != 9):
+        compareVariable = cspVariableList[row - 1][column + 1]
+        constraint = Constraint("TopRight {},{}|{},{}".format(row, column, row-1, column+1), [current, compareVariable])
+        satisfiedTuplesList = getSatisfiedTuplesList(current, compareVariable)
+        constraint.add_satisfying_tuples(satisfiedTuplesList)
+        constraintList.append(constraint)
+
+      # Check topLeft Constraint
+      if (row != 0 and column != 0):
+        compareVariable = cspVariableList[row - 1][column - 1]
+        constraint = Constraint("topLeft {},{}|{},{}".format(row, column, row-1, column-1), [current, compareVariable])
+        satisfiedTuplesList = getSatisfiedTuplesList(current, compareVariable)
+        constraint.add_satisfying_tuples(satisfiedTuplesList)
+        constraintList.append(constraint)
+      
+      #Check Bottom constarint
+      if (row != totalRows - 1):
+        compareVariable = cspVariableList[row + 1][column]
+        constraint = Constraint("BottomAdj {},{}|{},{}".format(row, column, row+1, column), [current, compareVariable])
+        satisfiedTuplesList = getSatisfiedTuplesList(current, compareVariable)
+        constraint.add_satisfying_tuples(satisfiedTuplesList)
+        constraintList.append(constraint)
+      
+      
+      # Check BottomLeft Constraint
+      if (row != totalRows - 1 and column != 0):
+        compareVariable = cspVariableList[row + 1][column - 1]
+        constraint = Constraint("BottomLeft {},{}|{},{}".format(row, column, row+1, column-1), [current, compareVariable])
+        satisfiedTuplesList = getSatisfiedTuplesList(current, compareVariable)
+        constraint.add_satisfying_tuples(satisfiedTuplesList)
+        constraintList.append(constraint)
+      
+      # Check BottomRight Constraint
+      if (row != totalRows - 1 and column != 9):
+        compareVariable = cspVariableList[row + 1][column + 1]
+        constraint = Constraint("BottomRight {},{}|{},{}".format(row, column, row+1, column+1), [current, compareVariable])
+        satisfiedTuplesList = getSatisfiedTuplesList(current, compareVariable)
+        constraint.add_satisfying_tuples(satisfiedTuplesList)
+        constraintList.append(constraint)
+      
+      for index in range(column + 1, 10):
+        current = cspVariableList[row][column]
+        compareVariable = cspVariableList[row][index]
+        constraint = Constraint("RowConstraint {},{}|{},{}".format(row, column, row, index), [current, compareVariable])
+        satisfiedTuplesList = getSatisfiedTuplesList(current, compareVariable)
+        constraint.add_satisfying_tuples(satisfiedTuplesList)
+        constraintList.append(constraint)
+
+def getColumnConstraints(constraintList, board, sumRow):
+  for column in range(10):
+    columnVariablesDomain = []
+    columnVariables = []
+    for row in range(len(board)):
+      variable = board[row][column]
+      columnVariablesDomain.append(variable.cur_domain())
+      columnVariables.append(variable)
+    constraint = Constraint("ColumnConstrant {}".format(column), columnVariables)
+    validTupleList = []
+    for product in itertools.product(*columnVariablesDomain):
+      if (sum(product) == sumRow[column]):
+        validTupleList.append(product)
+    constraint.add_satisfying_tuples(validTupleList)
+    constraintList.append(constraint)
+
+def getAllVariables(board):
+
+  result = []
+  totalRows = len(board)
+  for row in range(totalRows):
+    for column in range(10):
+      result.append(board[row][column])
+  
+  return result
+
+def addConstraintsToCsp(constraintList, csp):
+  for constraint in constraintList:
+    csp.add_constraint(constraint)
+
 def tenner_csp_model_1(initial_tenner_board):
     '''Return a CSP object representing a Tenner Grid CSP problem along 
        with an array of variables for the problem. That is return
@@ -64,10 +186,20 @@ def tenner_csp_model_1(initial_tenner_board):
        model_1 also constains n-nary constraints of sum constraints for each 
        column.
     '''
-    
-#IMPLEMENT
-    return None, None #CHANGE THIS
-##############################
+
+    varriableBoard = constructVariableArray(initial_tenner_board[0])
+    constraintList = []
+    ## Adding constraints to tennerModel
+    getAdjDiaRowConstraints(constraintList, len(varriableBoard), varriableBoard)
+    getColumnConstraints(constraintList, varriableBoard, initial_tenner_board[1])
+
+    allVariableList = getAllVariables(varriableBoard)
+    tennerModel = CSP("TennerModel1", allVariableList)
+
+    addConstraintsToCsp(constraintList, tennerModel)
+
+
+    return tennerModel, varriableBoard
 
 def tenner_csp_model_2(initial_tenner_board):
     '''Return a CSP object representing a Tenner Grid CSP problem along 
@@ -98,11 +230,12 @@ def tenner_csp_model_2(initial_tenner_board):
        board has a -1 at that position, and domain equal {i} if the board
        has a fixed number i at that cell.
 
-       However, model_2 has different constraints. In particular, instead
+      However, model_2 has different constraints. In particular, instead
        of binary non-equals constaints model_2 has a combination of n-nary 
        all-different constraints: all-different constraints for the variables in
-       each row, contiguous cells (including diagonally contiguous cells), and 
-       sum constraints for each column. Each of these constraints is over more 
+       each row, and sum constraints for each column. You may use binary 
+       contstraints to encode contiguous cells (including diagonally contiguous 
+       cells), however. Each -ary constraint is over more 
        than two variables (some of these variables will have
        a single value in their domain). model_2 should create these
        all-different constraints between the relevant variables.

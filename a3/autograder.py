@@ -29,9 +29,9 @@ def test_binary_model():
         cons = csp.get_all_cons()
         bin_flag = True
         for c in cons:
-            if (len(c.get_scope()) != 2):
+            if (len(c.get_scope()) != 2 and len(c.get_scope()) != len(b1[0])):
                 bin_flag = False
-                print("Non binary constraint detected!  Binary Test Failed.")
+                print("Only binary constraints an n-ary sum constraints allowed!  Binary Test Failed.")
                 break
     else:
         print("Binary Model Test Failed.")
@@ -248,7 +248,7 @@ if __name__ == "__main__":
             solver.bt_search(prop_GAC)
             print("Solution")
             print_tenner_soln(var_array)
-            print_tenner_soln(var_array)
+            # print_tenner_soln(var_array)
         else:
             print("Model 1 test failed.")
 

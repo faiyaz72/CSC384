@@ -133,7 +133,7 @@ def prop_GAC(csp, newVar=None):
     
     pruneList = []
     constraintQueue = deque()
-    if (newVar == None):
+    if (not newVar):
         for constraint in csp.get_all_cons():
             constraintQueue.append(constraint)
         while len(constraintQueue) > 0:
@@ -148,8 +148,6 @@ def prop_GAC(csp, newVar=None):
                             scope.prune_value(domain)
                             pruneList.append(pruneTuple)
                         if (scope.cur_domain_size() == 0):
-                            while not len(constraintQueue) == 0:
-                                constraintQueue.pop()
                             return (False, pruneList)
                         else:
                             ## Add affected constraints
@@ -158,12 +156,12 @@ def prop_GAC(csp, newVar=None):
                                     constraintQueue.append(addConstraint)
     else:
         ## Prune all values that are unassigned in this variable
-        for domain in newVar.cur_domain():
-            if (domain != newVar.get_assigned_value()):
-                pruneTuple = (newVar, domain)
-                if (pruneTuple not in pruneList):
-                    pruneList.append(pruneTuple)
-                    newVar.prune_value(domain)
+        # for domain in newVar.cur_domain():
+        #     if (domain != newVar.get_assigned_value()):
+        #         pruneTuple = (newVar, domain)
+        #         if (pruneTuple not in pruneList):
+        #             pruneList.append(pruneTuple)
+        #             newVar.prune_value(domain)
             
         for constraint in csp.get_cons_with_var(newVar):
             constraintQueue.append(constraint)
@@ -179,8 +177,6 @@ def prop_GAC(csp, newVar=None):
                             scope.prune_value(domain)
                             pruneList.append(pruneTuple)
                         if (scope.cur_domain_size() == 0):
-                            while not len(constraintQueue) == 0:
-                                constraintQueue.pop()
                             return (False, pruneList)
                         else:
                             ## Add affected constraints
