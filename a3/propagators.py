@@ -138,7 +138,7 @@ def prop_GAC(csp, newVar=None):
             constraintQueue.append(constraint)
         while len(constraintQueue) > 0:
             currentConstraint = constraintQueue.pop()
-            currentScopeList = currentConstraint.get_scope()
+            currentScopeList = currentConstraint.get_unasgn_vars()
             for scope in currentScopeList:
                 possibleDomains = scope.cur_domain()
                 removed = False
@@ -160,7 +160,7 @@ def prop_GAC(csp, newVar=None):
             constraintQueue.append(constraint)
         while len(constraintQueue) > 0:
             currentConstraint = constraintQueue.pop()
-            currentScopeList = currentConstraint.get_scope()
+            currentScopeList = currentConstraint.get_unasgn_vars()
             for scope in currentScopeList:
                 possibleDomains = scope.cur_domain()
                 removed = False
