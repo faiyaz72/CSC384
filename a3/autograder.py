@@ -2,14 +2,21 @@ from cspbase import *
 import itertools
 import traceback
 
-from propagators import prop_FC, prop_GAC, ord_mrv
 from tenner_csp import tenner_csp_model_1, tenner_csp_model_2
+from propagators import prop_FC,  prop_GAC, ord_mrv
 
 b1 = ([[-1, 0, 1,-1, 9,-1,-1, 5,-1, 2],
        [-1, 7,-1,-1,-1, 6, 1,-1,-1,-1],
        [-1,-1,-1, 8,-1,-1,-1,-1,-1, 9],
        [ 6,-1, 4,-1,-1,-1,-1, 7,-1,-1],
        [-1, 1,-1, 3,-1,-1, 5, 8, 2,-1]],
+      [29,16,18,21,24,24,21,28,17,27])
+
+b1_sol = ([[3, 0, 1, 7, 9, 4, 8, 5, 6, 2],
+       [9, 7, 5, 3, 0, 6, 1, 2, 8, 4],
+       [2, 3, 1, 8, 7, 5, 4, 6, 0, 9],
+       [6, 5, 4, 0, 2, 9, 3, 7, 1, 8],
+       [9, 1, 7, 3, 6, 0, 5, 8, 2, 4]],
       [29,16,18,21,24,24,21,28,17,27])
 
 b2 = ([[-1, -1, -1, 3, -1, -1, 8, 6, 5, -1],
@@ -20,6 +27,60 @@ b2 = ([[-1, -1, -1, 3, -1, -1, 8, 6, 5, -1],
        [-1, -1, -1, 8, -1, -1, -1, -1, -1, -1],
        [5, 8, -1, 7, -1, 4, -1, 0, 2, -1],],
       [26, 29, 40, 50, 20, 46, 26, 28, 16, 34])
+
+b2_sol = ([[1, 2, 4, 3, 0, 9, 8, 6, 5, 7],
+       [9, 6, 5, 7, 4, 3, 0, 1, 2, 8],
+       [7, 2, 3, 9, 1, 6, 8, 5, 0, 4],
+       [3, 0, 8, 7, 5, 9, 1, 4, 6, 2],
+       [1, 7, 5, 9, 2, 8, 6, 3, 0, 4],
+       [0, 4, 6, 8, 5, 7, 2, 9, 1, 3],
+       [5, 8, 9, 7, 3, 4, 1, 0, 2, 6],],
+      [26, 29, 40, 50, 20, 46, 26, 28, 16, 34])
+
+#Puzzle b2 does not have a unique solution! 
+b2_sol_alternative = ([[1, 2, 4, 3, 0, 9, 8, 6, 5, 7],
+       [8, 6, 5, 7, 4, 3, 0, 1, 2, 9],
+       [7, 2, 3, 9, 1, 6, 8, 5, 0, 4],
+       [3, 0, 8, 7, 5, 9, 1, 4, 6, 2],
+       [2, 7, 5, 9, 1, 8, 6, 3, 0, 4],
+       [0, 4, 6, 8, 3, 7, 2, 9, 1, 5],
+       [5, 8, 9, 7, 6, 4, 1, 0, 2, 3],],
+      [26, 29, 40, 50, 20, 46, 26, 28, 16, 34])
+
+b3 = ([[-1,-1, 3,-1, 5,-1,-1,-1, 6,-1],
+       [ 6,-1, 5, 9, 3, 8,-1,-1,-1,-1],
+       [-1, 0,-1,-1,-1,-1, 6,-1, 8, 5],
+       [ 2, 5,-1, 9,-1,-1,-1,-1, 3,-1]],
+      [18,12,19,27,18,19,15,17,19,16])
+
+b3_sol = ([[ 1, 0, 3, 8, 5, 2, 4, 9, 6, 7],
+       [ 6, 7, 5, 9, 3, 8, 1, 0, 2, 4],
+       [ 9, 0, 3, 1, 4, 2, 6, 7, 8, 5],
+       [ 2, 5, 8, 9, 6, 7, 4, 1, 3, 0]],
+      [18,12,19,27,18,19,15,17,19,16])
+
+b4 = ([[ 1, 5, 4, 7,-1,-1,-1,-1, 2,-1],
+       [-1,-1,-1, 5, 8, 1, 2, 7, 4,-1],
+       [-1,-1, 4, 7, 2, 9,-1,-1,-1, 1],
+       [ 3,-1, 1, 8,-1,-1, 2, 6,-1, 4],
+       [ 0, 9, 6, 2, 1, 3, 4, 5,-1, 7],
+       [ 5,-1, 1,-1,-1, 6, 8, 7, 3, 9]],
+      [18,28,22,33,20,27,19,41,26,36])
+
+b4_sol = ([[ 1, 5, 4, 7, 9, 3, 0, 8, 2, 6],
+       [ 3, 0, 6, 5, 8, 1, 2, 7, 4, 9],
+       [ 6, 5, 4, 7, 2, 9, 3, 8, 0, 1],
+       [ 3, 7, 1, 8, 0, 5, 2, 6, 9, 4],
+       [ 0, 9, 6, 2, 1, 3, 4, 5, 8, 7],
+       [ 5, 2, 1, 4, 0, 6, 8, 7, 3, 9]],
+      [18,28,22,33,20,27,19,41,26,36])
+
+empty = ([[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+       [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+       [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+       [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+       [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1]],
+      [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1])
 
 
 def test_binary_model():
@@ -34,8 +95,7 @@ def test_binary_model():
                 print("Only binary constraints an n-ary sum constraints allowed!  Binary Test Failed.")
                 break
     else:
-        print("Binary Model Test Failed.")
-
+        print("Binary Model Test Failed.") 
 
 def test_ord_mrv():
 
@@ -82,7 +142,6 @@ def test_ord_mrv():
     else:
         print("No Variable Returned from Ord MRV!")
 
-
 def queensCheck(qi, qj, i, j):
     '''Return true if i and j can be assigned to the queen in row qi and row qj
        respectively. Used to find satisfying tuples.
@@ -124,7 +183,6 @@ def test_simple_FC():
         queens = nQueens(8)
         curr_vars = queens.get_all_vars()
         curr_vars[0].assign(1)
-        
         prop_FC(queens,newVar=curr_vars[0])
         answer = [[1],[3, 4, 5, 6, 7, 8],[2, 4, 5, 6, 7, 8],[2, 3, 5, 6, 7, 8],[2, 3, 4, 6, 7, 8],[2, 3, 4, 5, 7, 8],[2, 3, 4, 5, 6, 8],[2, 3, 4, 5, 6, 7]]
         var_domain = [x.cur_domain() for x in curr_vars]
@@ -153,8 +211,8 @@ def test_simple_GAC():
         prop_GAC(queens,newVar=curr_vars[0])
         answer = [[1],[3, 4, 5, 6, 7, 8],[2, 4, 5, 6, 7, 8],[2, 3, 5, 6, 7, 8],[2, 3, 4, 6, 7, 8],[2, 3, 4, 5, 7, 8],[2, 3, 4, 5, 6, 8],[2, 3, 4, 5, 6, 7]]
         var_domain = [x.cur_domain() for x in curr_vars]
-        #print(var_domain)
-        #print(answer)
+        print(var_domain)
+        print(answer)
         for i in range(len(curr_vars)):
             if var_domain[i] != answer[i]:
                 details = "Failed simple GAC test: variable domains don't match expected results."
@@ -182,8 +240,8 @@ def three_queen_GAC():
         answer = [[4],[6, 7, 8],[1],[3, 8],[6, 7],[2, 8],[2, 3, 7, 8],[5]]
         var_vals = [x.cur_domain() for x in curr_vars]
 
-        #print(var_vals)
-        #print(answer)
+        print(var_vals)
+        print(answer)
         if var_vals != answer:
             details = "Failed three queens GAC test: variable domains don't match expected results"
 
@@ -227,14 +285,14 @@ def print_tenner_soln(var_array):
         print([var.get_assigned_value() for var in row])
 
 if __name__ == "__main__":
+    #import propagators as stu_propagators
+    #import tenner_csp as stu_models
 
-
-    print("Model Tests")
-
+    print("Model and Propagator Tests")
     test_ord_mrv()
     test_binary_model()
 
-    for b in [b1, b2]:
+    for b in [b1, b2, b3, b4]:
         print("Solving board:")
         for row in b[0]:
             print(row)
@@ -248,9 +306,6 @@ if __name__ == "__main__":
             solver.bt_search(prop_GAC)
             print("Solution")
             print_tenner_soln(var_array)
-            # print_tenner_soln(var_array)
-        else:
-            print("Model 1 test failed.")
 
         print("Using Model 2")        
         csp, var_array = tenner_csp_model_2(b)
@@ -261,8 +316,6 @@ if __name__ == "__main__":
             solver.bt_search(prop_FC)
             print("Solution")
             print_tenner_soln(var_array)
-        else:
-            print("Model 2 test failed.")
 
     total = 0
     print("Propagator Tests")
@@ -290,4 +343,4 @@ if __name__ == "__main__":
     total += score
     print(details)
     print("---finished three_queen_GAC---\n")
-    print("Total number of propagator tests passed %d/4\n" % total)        
+    print("Total score %d/4\n" % total)        
