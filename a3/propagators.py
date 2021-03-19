@@ -141,28 +141,21 @@ def prop_GAC(csp, newVar=None):
             currentScopeList = currentConstraint.get_scope()
             for scope in currentScopeList:
                 possibleDomains = scope.cur_domain()
+                removed = False
                 for domain in possibleDomains:
                     if (not currentConstraint.has_support(scope, domain)):
                         pruneTuple = (scope, domain)
+                        removed = True
                         if (pruneTuple not in pruneList):
                             scope.prune_value(domain)
                             pruneList.append(pruneTuple)
                         if (scope.cur_domain_size() == 0):
                             return (False, pruneList)
-                        else:
-                            ## Add affected constraints
-                            for addConstraint in csp.get_cons_with_var(scope):
-                                if (addConstraint not in constraintQueue):
-                                    constraintQueue.append(addConstraint)
+                if (removed):
+                    for addConstraint in csp.get_cons_with_var(scope):
+                        if (addConstraint not in constraintQueue and addConstraint != currentConstraint):
+                            constraintQueue.append(addConstraint)
     else:
-        ## Prune all values that are unassigned in this variable
-        # for domain in newVar.cur_domain():
-        #     if (domain != newVar.get_assigned_value()):
-        #         pruneTuple = (newVar, domain)
-        #         if (pruneTuple not in pruneList):
-        #             pruneList.append(pruneTuple)
-        #             newVar.prune_value(domain)
-            
         for constraint in csp.get_cons_with_var(newVar):
             constraintQueue.append(constraint)
         while len(constraintQueue) > 0:
@@ -170,19 +163,20 @@ def prop_GAC(csp, newVar=None):
             currentScopeList = currentConstraint.get_scope()
             for scope in currentScopeList:
                 possibleDomains = scope.cur_domain()
+                removed = False
                 for domain in possibleDomains:
                     if (not currentConstraint.has_support(scope, domain)):
                         pruneTuple = (scope, domain)
+                        removed = True
                         if (pruneTuple not in pruneList):
                             scope.prune_value(domain)
                             pruneList.append(pruneTuple)
                         if (scope.cur_domain_size() == 0):
                             return (False, pruneList)
-                        else:
-                            ## Add affected constraints
-                            for addConstraint in csp.get_cons_with_var(scope):
-                                if (addConstraint not in constraintQueue):
-                                    constraintQueue.append(addConstraint)
+                if (removed):
+                    for addConstraint in csp.get_cons_with_var(scope):
+                        if (addConstraint not in constraintQueue and addConstraint != currentConstraint):
+                            constraintQueue.append(addConstraint)
     return (True, pruneList)
 
 def ord_mrv(csp):
