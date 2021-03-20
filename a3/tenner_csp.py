@@ -34,73 +34,12 @@ def getSatisfiedTuplesList(current, compareVariable):
       result.append(checkTuple)
   return result
 
-def getAdjDiaRowConstraints(constraintList, totalRows, cspVariableList):
-
-  # topLeft  = array[ x - 1 ][ y - 1 ]
-  # topRight = array[ x + 1 ][ y - 1 ]
-  # botLeft  = array[ x - 1 ][ y + 1 ]
-  # botRight = array[ x + 1 ][ y + 1 ]
-
-  # Careful of overlaps
-  # If checking bottom, no need to check top
-  # If checking bottom - right, no need to check top - left
-  # If checking bottom - left, no need to check top - right
-  # If checking top, no need to check bottom
-  # If checking top - right, no need to check bottom - left
-  # If checking top - left, no need to check bottom - right
-
+def getAdjDiaRowConstraintsModel1(constraintList, totalRows, cspVariableList):
   for row in range(totalRows):
     for column in range(10):
       current = cspVariableList[row][column]
       # Check top constraint
-      if (row != 0):
-        compareVariable = cspVariableList[row - 1][column]
-        constraint = Constraint("TopAdj {},{}|{},{}".format(row, column, row-1, column), [current, compareVariable])
-        satisfiedTuplesList = getSatisfiedTuplesList(current, compareVariable)
-        constraint.add_satisfying_tuples(satisfiedTuplesList)
-        constraintList.append(constraint)
-
-      # Check topRight Constraint
-      if (row != 0 and column != 9):
-        compareVariable = cspVariableList[row - 1][column + 1]
-        constraint = Constraint("TopRight {},{}|{},{}".format(row, column, row-1, column+1), [current, compareVariable])
-        satisfiedTuplesList = getSatisfiedTuplesList(current, compareVariable)
-        constraint.add_satisfying_tuples(satisfiedTuplesList)
-        constraintList.append(constraint)
-
-      # Check topLeft Constraint
-      if (row != 0 and column != 0):
-        compareVariable = cspVariableList[row - 1][column - 1]
-        constraint = Constraint("topLeft {},{}|{},{}".format(row, column, row-1, column-1), [current, compareVariable])
-        satisfiedTuplesList = getSatisfiedTuplesList(current, compareVariable)
-        constraint.add_satisfying_tuples(satisfiedTuplesList)
-        constraintList.append(constraint)
-      
-      # #Check Bottom constarint
-      # if (row != totalRows - 1):
-      #   compareVariable = cspVariableList[row + 1][column]
-      #   constraint = Constraint("BottomAdj {},{}|{},{}".format(row, column, row+1, column), [current, compareVariable])
-      #   satisfiedTuplesList = getSatisfiedTuplesList(current, compareVariable)
-      #   constraint.add_satisfying_tuples(satisfiedTuplesList)
-      #   constraintList.append(constraint)
-      
-      
-      # # Check BottomLeft Constraint
-      # if (row != totalRows - 1 and column != 0):
-      #   compareVariable = cspVariableList[row + 1][column - 1]
-      #   constraint = Constraint("BottomLeft {},{}|{},{}".format(row, column, row+1, column-1), [current, compareVariable])
-      #   satisfiedTuplesList = getSatisfiedTuplesList(current, compareVariable)
-      #   constraint.add_satisfying_tuples(satisfiedTuplesList)
-      #   constraintList.append(constraint)
-      
-      # # Check BottomRight Constraint
-      # if (row != totalRows - 1 and column != 9):
-      #   compareVariable = cspVariableList[row + 1][column + 1]
-      #   constraint = Constraint("BottomRight {},{}|{},{}".format(row, column, row+1, column+1), [current, compareVariable])
-      #   satisfiedTuplesList = getSatisfiedTuplesList(current, compareVariable)
-      #   constraint.add_satisfying_tuples(satisfiedTuplesList)
-      #   constraintList.append(constraint)
-      
+      adjacentContraints(row, cspVariableList, column, current, constraintList)
       for index in range(column + 1, 10):
         current = cspVariableList[row][column]
         compareVariable = cspVariableList[row][index]
@@ -108,6 +47,63 @@ def getAdjDiaRowConstraints(constraintList, totalRows, cspVariableList):
         satisfiedTuplesList = getSatisfiedTuplesList(current, compareVariable)
         constraint.add_satisfying_tuples(satisfiedTuplesList)
         constraintList.append(constraint)
+
+def adjacentContraints(row, cspVariableList, column, current, constraintList):
+  # Careful of overlaps
+  # If checking bottom, no need to check top
+  # If checking bottom - right, no need to check top - left
+  # If checking bottom - left, no need to check top - right
+  # If checking top, no need to check bottom
+  # If checking top - right, no need to check bottom - left
+  # If checking top - left, no need to check bottom - right
+  if (row != 0):
+    compareVariable = cspVariableList[row - 1][column]
+    constraint = Constraint("TopAdj {},{}|{},{}".format(row, column, row-1, column), [current, compareVariable])
+    satisfiedTuplesList = getSatisfiedTuplesList(current, compareVariable)
+    constraint.add_satisfying_tuples(satisfiedTuplesList)
+    constraintList.append(constraint)
+
+  # Check topRight Constraint
+  if (row != 0 and column != 9):
+    compareVariable = cspVariableList[row - 1][column + 1]
+    constraint = Constraint("TopRight {},{}|{},{}".format(row, column, row-1, column+1), [current, compareVariable])
+    satisfiedTuplesList = getSatisfiedTuplesList(current, compareVariable)
+    constraint.add_satisfying_tuples(satisfiedTuplesList)
+    constraintList.append(constraint)
+
+  # Check topLeft Constraint
+  if (row != 0 and column != 0):
+    compareVariable = cspVariableList[row - 1][column - 1]
+    constraint = Constraint("topLeft {},{}|{},{}".format(row, column, row-1, column-1), [current, compareVariable])
+    satisfiedTuplesList = getSatisfiedTuplesList(current, compareVariable)
+    constraint.add_satisfying_tuples(satisfiedTuplesList)
+    constraintList.append(constraint)
+  
+        
+  # #Check Bottom constarint
+  # if (row != totalRows - 1):
+  #   compareVariable = cspVariableList[row + 1][column]
+  #   constraint = Constraint("BottomAdj {},{}|{},{}".format(row, column, row+1, column), [current, compareVariable])
+  #   satisfiedTuplesList = getSatisfiedTuplesList(current, compareVariable)
+  #   constraint.add_satisfying_tuples(satisfiedTuplesList)
+  #   constraintList.append(constraint)
+
+
+  # # Check BottomLeft Constraint
+  # if (row != totalRows - 1 and column != 0):
+  #   compareVariable = cspVariableList[row + 1][column - 1]
+  #   constraint = Constraint("BottomLeft {},{}|{},{}".format(row, column, row+1, column-1), [current, compareVariable])
+  #   satisfiedTuplesList = getSatisfiedTuplesList(current, compareVariable)
+  #   constraint.add_satisfying_tuples(satisfiedTuplesList)
+  #   constraintList.append(constraint)
+
+  # # Check BottomRight Constraint
+  # if (row != totalRows - 1 and column != 9):
+  #   compareVariable = cspVariableList[row + 1][column + 1]
+  #   constraint = Constraint("BottomRight {},{}|{},{}".format(row, column, row+1, column+1), [current, compareVariable])
+  #   satisfiedTuplesList = getSatisfiedTuplesList(current, compareVariable)
+  #   constraint.add_satisfying_tuples(satisfiedTuplesList)
+  #   constraintList.append(constraint)
 
 def getColumnConstraints(constraintList, board, sumRow):
   for column in range(10):
@@ -199,7 +195,7 @@ def tenner_csp_model_1(initial_tenner_board):
     varriableBoard = constructVariableArray(initial_tenner_board[0])
     constraintList = []
     ## Adding constraints to tennerModel
-    getAdjDiaRowConstraints(constraintList, len(varriableBoard), varriableBoard)
+    getAdjDiaRowConstraintsModel1(constraintList, len(varriableBoard), varriableBoard)
     getColumnConstraints(constraintList, varriableBoard, initial_tenner_board[1])
 
     allVariableList = getAllVariables(varriableBoard)
@@ -249,6 +245,16 @@ def tenner_csp_model_2(initial_tenner_board):
        a single value in their domain). model_2 should create these
        all-different constraints between the relevant variables.
     '''
+    varriableBoard = constructVariableArray(initial_tenner_board[0])
+    constraintList = []
+    ## Adding constraints to tennerModel
+    getAdjDiaRowConstraintsModel1(constraintList, len(varriableBoard), varriableBoard)
+    getColumnConstraints(constraintList, varriableBoard, initial_tenner_board[1])
 
-#IMPLEMENT
-    return None, None #CHANGE THIS
+    allVariableList = getAllVariables(varriableBoard)
+    tennerModel = CSP("TennerModel2", allVariableList)
+
+    addConstraintsToCsp(constraintList, tennerModel)
+
+
+    return None, None
