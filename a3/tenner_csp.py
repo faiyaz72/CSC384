@@ -8,6 +8,10 @@ Construct and return Tenner Grid CSP models.
 from cspbase import *
 import itertools
 
+def addToConstraint(constraint, satisfiedTuplesList, constraintList):
+  constraint.add_satisfying_tuples(satisfiedTuplesList)
+  constraintList.append(constraint)
+
 def constructVariableArray(board):
   result = []
   totalRows = len(board)
@@ -44,8 +48,7 @@ def getAdjDiaRowConstraintsModel1(constraintList, totalRows, cspVariableList):
         compareVariable = cspVariableList[row][index]
         constraint = Constraint("RowConstraint {},{}|{},{}".format(row, column, row, index), [current, compareVariable])
         satisfiedTuplesList = getSatisfiedTuplesList(current, compareVariable)
-        constraint.add_satisfying_tuples(satisfiedTuplesList)
-        constraintList.append(constraint)
+        addToConstraint(constraint, satisfiedTuplesList, constraintList)
 
 def getAdjDiaRowConstraintsModel2(constraintList, totalRows, cspVariableList):
   unassignedDomain = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
@@ -80,10 +83,7 @@ def getAdjDiaRowConstraintsModel2(constraintList, totalRows, cspVariableList):
           seenFlag[i] = True
       if (not isBroken):
         satisfiedTuplesList.append(product)
-    constraint.add_satisfying_tuples(satisfiedTuplesList)
-    constraintList.append(constraint)
-    
-     
+    addToConstraint(constraint, satisfiedTuplesList, constraintList)
 
 def adjacentContraints(row, cspVariableList, column, current, constraintList):
   # Careful of overlaps
@@ -97,24 +97,21 @@ def adjacentContraints(row, cspVariableList, column, current, constraintList):
     compareVariable = cspVariableList[row - 1][column]
     constraint = Constraint("TopAdj {},{}|{},{}".format(row, column, row-1, column), [current, compareVariable])
     satisfiedTuplesList = getSatisfiedTuplesList(current, compareVariable)
-    constraint.add_satisfying_tuples(satisfiedTuplesList)
-    constraintList.append(constraint)
+    addToConstraint(constraint, satisfiedTuplesList, constraintList)
 
   # Check topRight Constraint
   if (row != 0 and column != 9):
     compareVariable = cspVariableList[row - 1][column + 1]
     constraint = Constraint("TopRight {},{}|{},{}".format(row, column, row-1, column+1), [current, compareVariable])
     satisfiedTuplesList = getSatisfiedTuplesList(current, compareVariable)
-    constraint.add_satisfying_tuples(satisfiedTuplesList)
-    constraintList.append(constraint)
+    addToConstraint(constraint, satisfiedTuplesList, constraintList)
 
   # Check topLeft Constraint
   if (row != 0 and column != 0):
     compareVariable = cspVariableList[row - 1][column - 1]
     constraint = Constraint("topLeft {},{}|{},{}".format(row, column, row-1, column-1), [current, compareVariable])
     satisfiedTuplesList = getSatisfiedTuplesList(current, compareVariable)
-    constraint.add_satisfying_tuples(satisfiedTuplesList)
-    constraintList.append(constraint)
+    addToConstraint(constraint, satisfiedTuplesList, constraintList)
   
         
   # #Check Bottom constarint
@@ -155,8 +152,7 @@ def getColumnConstraints(constraintList, variableBoard, sumRow):
     for product in itertools.product(*columnVariablesDomain):
       if (sum(product) == sumRow[column]):
         validTupleList.append(product)
-    constraint.add_satisfying_tuples(validTupleList)
-    constraintList.append(constraint)
+    addToConstraint(constraint, validTupleList, constraintList)
 
 def getAllVariables(board):
 
