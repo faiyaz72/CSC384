@@ -292,7 +292,7 @@ if __name__ == "__main__":
     test_ord_mrv()
     test_binary_model()
 
-    for b in [b1, b2, b3, b4]:
+    for b in [b1, b3, b4]:
         print("Solving board:")
         for row in b[0]:
             print(row)
@@ -312,8 +312,8 @@ if __name__ == "__main__":
         if csp != None:        
             solver = BT(csp)
             print("=======================================================")
-            print("FC")
-            solver.bt_search(prop_FC)
+            print("GAC")
+            solver.bt_search(prop_GAC, ord_mrv)
             print("Solution")
             print_tenner_soln(var_array)
 
