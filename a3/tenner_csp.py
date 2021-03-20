@@ -38,7 +38,6 @@ def getAdjDiaRowConstraintsModel1(constraintList, totalRows, cspVariableList):
   for row in range(totalRows):
     for column in range(10):
       current = cspVariableList[row][column]
-      # Check top constraint
       adjacentContraints(row, cspVariableList, column, current, constraintList)
       for index in range(column + 1, 10):
         current = cspVariableList[row][column]
@@ -47,6 +46,44 @@ def getAdjDiaRowConstraintsModel1(constraintList, totalRows, cspVariableList):
         satisfiedTuplesList = getSatisfiedTuplesList(current, compareVariable)
         constraint.add_satisfying_tuples(satisfiedTuplesList)
         constraintList.append(constraint)
+
+def getAdjDiaRowConstraintsModel2(constraintList, totalRows, cspVariableList):
+  unassignedDomain = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+  for row in range(totalRows):
+    unIntializedVariables = []
+    availableDomains = []
+    assignedFlag = [False, False, False, False, False, False, False, False, False, False]
+    for column in range(10):
+      current = cspVariableList[row][column]
+      adjacentContraints(row, cspVariableList, column, current, constraintList)
+      if (not current.is_assigned()):
+        unIntializedVariables.append(current)
+      else:
+        assignedFlag[current.get_assigned_value()] = True
+    
+    # unIntializedVariables contains all unassigned variables for this row
+    for i in range(len(assignedFlag)):
+      if (assignedFlag[i] == False):
+        availableDomains.append(unassignedDomain[i])
+
+    constraint = Constraint("RowConstraint {}".format(row), unIntializedVariables)
+    satisfiedTuplesList = []
+    rowVariableDomains = [availableDomains for i in range(len(unIntializedVariables))]
+    for product in itertools.product(*rowVariableDomains):
+      seenFlag =  [False, False, False, False, False, False, False, False, False, False]
+      isBroken = False
+      for i in product:
+        if (seenFlag[i]):
+          isBroken = True
+          break
+        else:
+          seenFlag[i] = True
+      if (not isBroken):
+        satisfiedTuplesList.append(product)
+    constraint.add_satisfying_tuples(satisfiedTuplesList)
+    constraintList.append(constraint)
+    
+     
 
 def adjacentContraints(row, cspVariableList, column, current, constraintList):
   # Careful of overlaps
@@ -105,12 +142,12 @@ def adjacentContraints(row, cspVariableList, column, current, constraintList):
   #   constraint.add_satisfying_tuples(satisfiedTuplesList)
   #   constraintList.append(constraint)
 
-def getColumnConstraints(constraintList, board, sumRow):
+def getColumnConstraints(constraintList, variableBoard, sumRow):
   for column in range(10):
     columnVariablesDomain = []
     columnVariables = []
-    for row in range(len(board)):
-      variable = board[row][column]
+    for row in range(len(variableBoard)):
+      variable = variableBoard[row][column]
       columnVariablesDomain.append(variable.cur_domain())
       columnVariables.append(variable)
     constraint = Constraint("ColumnConstrant {}".format(column), columnVariables)
@@ -248,7 +285,7 @@ def tenner_csp_model_2(initial_tenner_board):
     varriableBoard = constructVariableArray(initial_tenner_board[0])
     constraintList = []
     ## Adding constraints to tennerModel
-    getAdjDiaRowConstraintsModel1(constraintList, len(varriableBoard), varriableBoard)
+    getAdjDiaRowConstraintsModel2(constraintList, len(varriableBoard), varriableBoard)
     getColumnConstraints(constraintList, varriableBoard, initial_tenner_board[1])
 
     allVariableList = getAllVariables(varriableBoard)
@@ -257,4 +294,4 @@ def tenner_csp_model_2(initial_tenner_board):
     addConstraintsToCsp(constraintList, tennerModel)
 
 
-    return None, None
+    return tennerModel, varriableBoard
