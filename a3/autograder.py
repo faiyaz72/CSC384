@@ -303,7 +303,7 @@ if __name__ == "__main__":
             solver = BT(csp)
             print("=======================================================")
             print("GAC")
-            solver.bt_search(prop_GAC)
+            solver.bt_search(prop_GAC, ord_mrv)
             print("Solution")
             print_tenner_soln(var_array)
 
