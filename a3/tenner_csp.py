@@ -21,10 +21,10 @@ def constructVariableArray(board):
     for column in range(10):
       if (board[row][column] != -1):
         value = board[row][column]
-        variable = Variable("Row " + str(row) + " Column " + str(column), [value]) # Change to current?
+        variable = Variable("Row|Column {}|{}".format(row, column), [value]) # Change to current?
         variable.assign(value)
       else:
-        variable = Variable("Row " + str(row) + " Column " + str(column), domain)
+        variable = Variable("Row|Column {}|{}".format(row, column), domain)
       variableRowList.append(variable)
 
     result.append(variableRowList)
