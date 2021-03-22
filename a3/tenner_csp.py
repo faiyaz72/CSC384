@@ -43,13 +43,16 @@ def getAdjDiaRowConstraintsModel1(constraintList, totalRows, cspVariableList):
     for column in range(10):
       current = cspVariableList[row][column]
       adjacentContraints(row, cspVariableList, column, current, constraintList)
-      for index in range(column + 1, 10):
+      index = column + 1
+      # Avoid going through the ENTIRE row
+      while index < 10:
         current = cspVariableList[row][column]
         compareVariable = cspVariableList[row][index]
         constraint = Constraint("RowConstraint {},{}|{},{}".format(row, column, row, index), [current, compareVariable])
         satisfiedTuplesList = getSatisfiedTuplesList(current, compareVariable)
         addToConstraint(constraint, satisfiedTuplesList, constraintList)
-
+        index = index + 1
+       
 def getAdjDiaRowConstraintsModel2(constraintList, totalRows, cspVariableList):
   unassignedDomain = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
   for row in range(totalRows):
