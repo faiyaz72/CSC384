@@ -3,12 +3,14 @@
 # and calls the tagger (which you need to implement)
 import os
 import sys
+import numpy as np
 
 emissionTable = dict()
 posCountTable = dict()
+stateSpace = []
+observationSpace = []
 
 transitionTable = dict()
-
 def updatePosCount(pos):
     if (pos not in posCountTable):
         posCountTable[pos] = 1
@@ -33,6 +35,7 @@ def populateTransitionTable(pos1, pos2):
         transitionBucket = transitionTable.get(pos1)
         transitionBucket[pos2] = 1
         transitionBucket['total'] = 1
+        stateSpace.append(pos1)
     else:
         transitionBucket = transitionTable.get(pos1)
         if (pos2 not in transitionBucket):
@@ -85,6 +88,33 @@ def tag(training_list, test_file, output_file):
         for transition in transitionBucket:
             if (transition != "total"):
                 transitionBucket[transition] = transitionBucket[transition]/total
+    
+    test = open(test_file, "r")
+    while True: 
+        testLine = test.readline()
+        if (not testLine):
+            break
+        parse = testLine.split()
+        observationSpace.append(parse[0])
+
+    probTrellis = np.zeros((len(stateSpace), len(observationSpace)))
+    pathTrellis = np.empty((len(stateSpace), len(observationSpace)), dtype=object)
+
+    for s in range(len(stateSpace)):
+        emissionProbBucket = emissionTable[observationSpace[0]]
+        probValue = 0
+        if (stateSpace[s] in emissionProbBucket):
+            probValue = emissionProbBucket[stateSpace[s]]
+        probTrellis[s,0] = probValue
+        pathTrellis[s,0] = stateSpace[s]
+
+    # for o in range(1, len(observationSpace)):
+    #     for s in range(len(stateSpace)):
+            
+    #         # x = np.argmax(x in probTrellis[x, o-1])
+    
+    print("initial done")
+
 
 
     
