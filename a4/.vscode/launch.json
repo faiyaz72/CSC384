@@ -5,14 +5,23 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: Current File",
+            "name": "smallTraining1",
             "type": "python",
             "request": "launch",
-            "program": "${file}",
-            "console": "integratedTerminal"
+            "program": "tagger.py",
+            "console": "integratedTerminal",
+            "cwd" : "${workspaceFolder}/${relativeFileDirname}",
+            "args": [
+                "-d",
+                "smallTraining1.txt",
+                "-t",
+                "smalltest1.txt",
+                "-o",
+                "write1.txt"
+            ]
         },
         {
-            "name": "training1",
+            "name": "largeTraining1",
             "type": "python",
             "request": "launch",
             "program": "tagger.py",

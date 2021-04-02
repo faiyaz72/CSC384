@@ -7,6 +7,8 @@ import sys
 emissionTable = dict()
 posCountTable = dict()
 
+transitionTable = dict()
+
 def updatePosCount(pos):
     if (pos not in posCountTable):
         posCountTable[pos] = 1
@@ -25,28 +27,64 @@ def populateEmissionTable(word, pos):
         else:
             posBucket[pos] = posBucket[pos] + 1
 
+def populateTransitionTable(pos1, pos2):
+    if (pos1 not in transitionTable):
+        transitionTable[pos1] = dict()
+        transitionBucket = transitionTable.get(pos1)
+        transitionBucket[pos2] = 1
+        transitionBucket['total'] = 1
+    else:
+        transitionBucket = transitionTable.get(pos1)
+        if (pos2 not in transitionBucket):
+            transitionBucket[pos2] = 1
+        else:
+            transitionBucket[pos2] = transitionBucket[pos2] + 1
+        transitionBucket['total'] = transitionBucket['total'] + 1
+
+
+
 def tag(training_list, test_file, output_file):
     # Tag the words from the untagged input file and write them into the output file.
     # Doesn't do much else beyond that yet.
     print("Tagging the file.")
     for file in training_list:
         training = open(file, "r")
-        while True:
-            line = training.readline()
-            if not line:
-                break
-            lineList = line.split()
-            word = lineList[0]
-            pos = lineList[-1]
+        currentLine = training.readline()
+        if (currentLine):
+            nextLine = training.readline()
+        else:
+            nextLine = None
 
-            populateEmissionTable(word, pos)
-            updatePosCount(pos)
-    
+        while True:
+            if not currentLine:
+                break
+            lineList1 = currentLine.split()
+            word1 = lineList1[0]
+            pos1 = lineList1[-1]
+            populateEmissionTable(word1, pos1)
+            updatePosCount(pos1)
+
+            if (nextLine):
+                lineList2 = nextLine.split()
+                pos2 = lineList2[-1]                
+                populateTransitionTable(pos1, pos2)
+
+
+            currentLine = nextLine
+            nextLine = training.readline()
+
     for word in emissionTable:
         posBucket = emissionTable.get(word)
         for pos in posBucket:
             posCount = posCountTable[pos]
             posBucket[pos] = posBucket[pos]/posCount
+
+    for pos in transitionTable:
+        transitionBucket = transitionTable.get(pos)
+        total = transitionBucket['total']
+        for transition in transitionBucket:
+            if (transition != "total"):
+                transitionBucket[transition] = transitionBucket[transition]/total
 
 
     
