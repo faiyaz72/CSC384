@@ -89,21 +89,21 @@ def tag(training_list, test_file, output_file):
         parse = testLine.split()
         observationSpace.append(parse[0])
     
-    emissionPath = []
-    for observation in observationSpace:
-        maxProb = 0
-        maxState = None
-        for state in stateSpace:
-            key = observation + " | " + state
-            if (key in emissionTable):
-                if (emissionTable[key] > maxProb):
-                    maxProb = emissionTable[key]
-                    maxState = state
-        if (not maxState):
-            maxState = stateSpace[np.randint(0, len(stateSpace) - 1)]
-        emissionPath.append(maxState)
+    # emissionPath = []
+    # for observation in observationSpace:
+    #     maxProb = 0
+    #     maxState = None
+    #     for state in stateSpace:
+    #         key = observation + " | " + state
+    #         if (key in emissionTable):
+    #             if (emissionTable[key] > maxProb):
+    #                 maxProb = emissionTable[key]
+    #                 maxState = state
+    #     if (not maxState):
+    #         maxState = stateSpace[np.randint(0, len(stateSpace) - 1)]
+    #     emissionPath.append(maxState)
 
-    print(emissionPath)
+    # print(emissionPath)
     # probTrellis = np.zeros((len(stateSpace), len(observationSpace)))
     # pathTrellis = np.empty((len(stateSpace), len(observationSpace)), dtype=object)
 
@@ -140,8 +140,44 @@ def tag(training_list, test_file, output_file):
     #         print(x)
 
 
-
+    state = []
+    intialObservation = observationSpace[0]
+    maxProb = 0
+    maxState = None
+    for s in range(len(stateSpace)):
+        key = intialObservation + " | " + stateSpace[s]
+        if (key in emissionTable):
+            if (emissionTable[key] > maxProb):
+                maxProb = emissionTable[key]
+                maxState = stateSpace[s]
+    if (not maxState):
+        maxState = stateSpace[np.random.randint(0, len(stateSpace) - 1)]
     
+    state.append(maxState)
+        
+    print("Starting Vertibi")
+    for o in range(1, len(observationSpace)):
+        probList = []
+        for s in range(len(stateSpace)):
+            transitionKey = state[-1] + " | " + stateSpace[s]
+            if (transitionKey not in transitionTable):
+                transition = 0
+            else:
+                transition = transitionTable[state[-1] + " | " + stateSpace[s]]
+
+            emissionKey = observationSpace[o] + " | " + stateSpace[s]
+            if (emissionKey not in emissionTable):
+                emission = 0
+            else:
+                emission = emissionTable[observationSpace[o] + " | " + stateSpace[s]]
+
+            probability = emission * transition
+            probList.append(probability)
+        
+        maxProb = max(probList)
+        stateMax = stateSpace[probList.index(maxProb)]
+        state.append(stateMax)
+
     print("File read")
 
 
