@@ -1,41 +1,40 @@
 {
-    // Use IntelliSense to learn about possible attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
-    "version": "0.2.0",
-    "configurations": [
-
-        {
-            "name": "smallTraining1",
-            "type": "python",
-            "request": "launch",
-            "program": "tagger.py",
-            "console": "integratedTerminal",
-            "cwd" : "${workspaceFolder}/${relativeFileDirname}",
-            "args": [
-                "-d",
-                "smallTraining1.txt",
-                "-t",
-                "smalltest1.txt",
-                "-o",
-                "write1.txt"
-            ]
-        },
-        {
-            "name": "largeTraining",
-            "type": "python",
-            "request": "launch",
-            "program": "tagger.py",
-            "console": "integratedTerminal",
-            "cwd" : "${workspaceFolder}/${relativeFileDirname}",
-            "args": [
-                "-d",
-                "training1.txt",
-                "-t",
-                "test1.txt",
-                "-o",
-                "write1.txt"
-            ]
-        }
-    ]
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Python: Current File",
+      "type": "python",
+      "request": "launch",
+      "program": "${file}",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "smallTraining1",
+      "type": "python",
+      "request": "launch",
+      "program": "tagger.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}/${relativeFileDirname}",
+      "args": [
+        "-d",
+        "smallTraining1.txt",
+        "-t",
+        "smalltest1.txt",
+        "-o",
+        "smallWrite1.txt"
+      ]
+    },
+    {
+      "name": "largeTraining",
+      "type": "python",
+      "request": "launch",
+      "program": "tagger.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}/${relativeFileDirname}",
+      "args": ["-d", "training1.txt", "-t", "test1.txt", "-o", "write1.txt"]
+    }
+  ]
 }

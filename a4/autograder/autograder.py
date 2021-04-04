@@ -11,7 +11,7 @@ if __name__ == '__main__':
     # Invoke the shell command to train and test the HMM tagger
     print("Training on autotraining.txt, running tests on autotest.txt. "
           "Output --> autooutput.txt")
-    os.system("python3 tagger.py -d autotraining.txt -t autotest.txt -o autooutput.txt")
+    # os.system("python3 autograder/tagger.py -d autotraining.txt -t autotest.txt -o autooutput.txt")
 
     # Compare the contents of the HMM tagger output with the reference solution.
     # Store the missed cases and overall stats in results.txt
