@@ -4,45 +4,40 @@
 import os
 import sys
 import numpy as np
+from numpy.lib import tracemalloc_domain
 
 emissionTable = dict()
 posCountTable = dict()
 stateSpace = []
 observationSpace = []
-
 transitionTable = dict()
+transitionCount = dict()
+
 def updatePosCount(pos):
     if (pos not in posCountTable):
         posCountTable[pos] = 1
+        stateSpace.append(pos)
     else:
         posCountTable[pos] = posCountTable[pos] + 1
 
 def populateEmissionTable(word, pos):
-    if (word not in emissionTable):
-        emissionTable[word] = dict()
-        posBucket = emissionTable.get(word)
-        posBucket[pos] = 1
+    key = word + " | " + pos 
+    if (key not in emissionTable):
+        emissionTable[key] = 1
     else:
-        posBucket = emissionTable.get(word)
-        if (pos not in posBucket):
-            posBucket[pos] = 1
-        else:
-            posBucket[pos] = posBucket[pos] + 1
+        emissionTable[key] = emissionTable[key] + 1
 
 def populateTransitionTable(pos1, pos2):
-    if (pos1 not in transitionTable):
-        transitionTable[pos1] = dict()
-        transitionBucket = transitionTable.get(pos1)
-        transitionBucket[pos2] = 1
-        transitionBucket['total'] = 1
-        stateSpace.append(pos1)
+    key = pos1 + " | " + pos2 
+    if (key not in transitionTable):
+        transitionTable[key] = 1
     else:
-        transitionBucket = transitionTable.get(pos1)
-        if (pos2 not in transitionBucket):
-            transitionBucket[pos2] = 1
-        else:
-            transitionBucket[pos2] = transitionBucket[pos2] + 1
-        transitionBucket['total'] = transitionBucket['total'] + 1
+        transitionTable[key] = transitionTable[key] + 1
+    
+    if pos1 not in transitionCount:
+        transitionCount[pos1] = 1
+    else:
+        transitionCount[pos1] = transitionCount[pos1] + 1
 
 
 
@@ -76,18 +71,15 @@ def tag(training_list, test_file, output_file):
             currentLine = nextLine
             nextLine = training.readline()
 
-    for word in emissionTable:
-        posBucket = emissionTable.get(word)
-        for pos in posBucket:
-            posCount = posCountTable[pos]
-            posBucket[pos] = posBucket[pos]/posCount
+    for pair in emissionTable:
+        parse = pair.split()
+        pos = parse[-1]
+        emissionTable[pair] = emissionTable[pair]/posCountTable[pos]
 
-    for pos in transitionTable:
-        transitionBucket = transitionTable.get(pos)
-        total = transitionBucket['total']
-        for transition in transitionBucket:
-            if (transition != "total"):
-                transitionBucket[transition] = transitionBucket[transition]/total
+    for pair in transitionTable:
+        parse = pair.split()
+        total = transitionCount[parse[0]]
+        transitionTable[pair] = transitionTable[pair]/total
     
     test = open(test_file, "r")
     while True: 
@@ -96,24 +88,56 @@ def tag(training_list, test_file, output_file):
             break
         parse = testLine.split()
         observationSpace.append(parse[0])
+    
+    emissionPath = []
+    for observation in observationSpace:
+        maxProb = 0
+        maxState = None
+        for state in stateSpace:
+            key = observation + " | " + state
+            if (key in emissionTable):
+                if (emissionTable[key] > maxProb):
+                    maxProb = emissionTable[key]
+                    maxState = state
+        if (not maxState):
+            maxState = stateSpace[np.randint(0, len(stateSpace) - 1)]
+        emissionPath.append(maxState)
 
-    probTrellis = np.zeros((len(stateSpace), len(observationSpace)))
-    pathTrellis = np.empty((len(stateSpace), len(observationSpace)), dtype=object)
+    print(emissionPath)
+    # probTrellis = np.zeros((len(stateSpace), len(observationSpace)))
+    # pathTrellis = np.empty((len(stateSpace), len(observationSpace)), dtype=object)
 
-    for s in range(len(stateSpace)):
-        emissionProbBucket = emissionTable[observationSpace[0]]
-        probValue = 0
-        if (stateSpace[s] in emissionProbBucket):
-            probValue = emissionProbBucket[stateSpace[s]]
-        probTrellis[s,0] = probValue
-        pathTrellis[s,0] = stateSpace[s]
+    # for s in range(len(stateSpace)):
+    #     probValue = 0
+    #     key = observationSpace[0] + " | " + stateSpace[s]
+    #     if (key in emissionTable):
+    #         probValue = emissionTable[key]
+    #     probTrellis[s,0] = probValue
+    #     pathTrellis[s,0] = stateSpace[s]
 
     # for o in range(1, len(observationSpace)):
+    #     maxProb = []
     #     for s in range(len(stateSpace)):
-            
-    #         # x = np.argmax(x in probTrellis[x, o-1])
-    
-    print("initial done")
+    #         # x = np.argmax(x in probTrellis[x, o-1] * transitionTable[pathTrellis[x][o-1] + " | " + stateSpace[s]] * emissionTable[observationSpace[o] + " | " + stateSpace[s]])
+    #         maxIndex = []
+    #         maxProb = []
+    #         limit = probTrellis.shape
+    #         for x in range(limit[0]):
+    #             transitionKey = pathTrellis[x][o-1] + " | " + stateSpace[s]
+    #             if (transitionKey not in transitionTable):
+    #                 transition = 0
+    #             else:
+    #                 transition = transitionTable[pathTrellis[x][o-1] + " | " + stateSpace[s]]
+
+    #             emissionKey = observationSpace[o] + " | " + stateSpace[s]
+    #             if (emissionKey not in emissionTable):
+    #                 emission = 0
+    #             else:
+    #                 emission = emissionTable[observationSpace[o] + " | " + stateSpace[s]]
+    #             probability = probTrellis[x, o-1] * transition * emission
+    #             maxProb.append(probability)
+    #             maxIndex.append(st)
+    #         print(x)
 
 
 
