@@ -146,6 +146,7 @@ if __name__ == '__main__':
     # Tagger expects the input call: "python3 tagger.py -d <training files> -t <test file> -o <output file>"
     parameters = sys.argv
     training_list = parameters[parameters.index("-d")+1:parameters.index("-t")]
+    print(training_list)
     test_file = parameters[parameters.index("-t")+1]
     output_file = parameters[parameters.index("-o")+1]
     # print("Training files: " + str(training_list))
